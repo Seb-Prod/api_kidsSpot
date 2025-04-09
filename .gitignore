@@ -10,3 +10,6 @@ Thumbs.db
 # Dossiers IDE
 .idea/
 .vscode/
+
+# config
+config/config.php

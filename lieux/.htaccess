@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteBase /api_kidzs_spot/lieux/
+
+RewriteRule ^readAll/([0-9.\-]+)/([0-9.\-]+)$ readAll.php?lat=$1&lng=$2 [L,QSA]

@@ -43,4 +43,50 @@ class Lieux {
         $query->execute();
         return $query;
     }
+
+    public function lireGeolocal($latitude, $longitude)
+    {
+        $sql = "SELECT 
+            l.id AS id_lieu, 
+            l.nom AS nom_lieu, 
+            l.latitude,
+            l.longitude,
+            l.ville, 
+            l.code_postal, 
+            l.telephone, 
+            t.nom AS type_lieu, 
+            CASE WHEN e.id IS NOT NULL THEN 'Oui' ELSE 'Non' END AS est_evenement, 
+            GROUP_CONCAT(DISTINCT te.nom SEPARATOR ', ') AS equipements, 
+            e.date_debut, 
+            e.date_fin,
+            (
+                6371 * acos(
+                    cos(radians(:latitude)) * 
+                    cos(radians(l.latitude)) * 
+                    cos(radians(l.longitude) - radians(:longitude)) + 
+                    sin(radians(:latitude)) * 
+                    sin(radians(l.latitude))
+                )
+            ) AS distance
+        FROM 
+            lieux l 
+        JOIN 
+            types_lieux t ON l.id_type = t.id 
+        LEFT JOIN 
+            lieux_equipement le ON l.id = le.id_lieux 
+        LEFT JOIN 
+            types_equipement te ON le.id_equipement = te.id 
+        LEFT JOIN 
+            evenements e ON l.id = e.id_lieux 
+        GROUP BY 
+            l.id, e.id 
+        ORDER BY 
+            distance ASC";
+
+        $query = $this->connexion->prepare($sql);
+        $query->bindParam(':latitude', $latitude);
+        $query->bindParam(':longitude', $longitude);
+        $query->execute();
+        return $query;
+    }
 }
