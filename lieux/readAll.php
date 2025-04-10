@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $latitude = round($latitude, 6);
         $longitude = round($longitude, 6);
         // Appel à la méthode avec géolocalisation
-        $stmt = $lieux->lireGeolocal($latitude, $longitude);
+        $stmt = $lieux->obtenirLieuxAutour($latitude, $longitude);
 
         if ($stmt->rowCount() > 0) {
             $tableauLieux = [];
