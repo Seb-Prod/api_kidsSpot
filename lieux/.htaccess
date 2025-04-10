@@ -1,6 +1,10 @@
 RewriteEngine On
-# Règle pour lire tous les lieux autour d'une latitude et longitude
-RewriteRule ^readAll/([0-9.-]+)/([0-9.-]+)$ readAll.php?lat=$1&lng=$2 [L,QSA]
 
-# Règle pour lire un lieu spécifique par son ID
-RewriteRule ^([0-9]+)$ lire.php?id=$1 [L,QSA]
+# Lire un lieu spécifique par son ID
+RewriteRule ^([0-9]+)$ read.php?id=$1 [L,QSA]
+
+# Lire tous les lieux autour d'une latitude/longitude (ex: /autour/48.8566/2.3522)
+RewriteRule ^autour/(-?[0-9]{1,3}(?:\.[0-9]+)?)/(-?[0-9]{1,3}(?:\.[0-9]+)?)$ readAll.php?lat=$1&lng=$2 [L,QSA]
+
+RewriteCond %{REQUEST_URI} ^/autour/
+RewriteRule ^autour/.*$ 400.php [L]

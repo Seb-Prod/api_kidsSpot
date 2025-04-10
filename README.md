@@ -72,7 +72,7 @@ Cette classe gère les opérations liées aux lieux dans la base de données.
 
 ## Points d'entrée de l'API
 
-### `lieux/lire.php`
+### `lieux/read.php`
 
 Point d'entrée pour récupérer les détails d'un lieu spécifique.
 
@@ -181,15 +181,15 @@ Point d'entrée pour récupérer les lieux autour d'une position géographique.
 
 **Exemple d'utilisation :**
 ```
-GET /lieux/readAll/45.75/4.85
+GET /lieux/autour/45.75/4.85
 ```
 
 ## URL amicales (via .htaccess)
 
 L'API utilise des règles de réécriture pour simplifier les URL :
 
-- `/lieux/{id}` redirige vers `lire.php?id={id}`
-- `/lieux/readAll/{latitude}/{longitude}` redirige vers `readAll.php?lat={latitude}&lng={longitude}`
+- `/lieux/{id}` redirige vers `read.php?id={id}`
+- `/lieux/autour/{latitude}/{longitude}` redirige vers `readAll.php?lat={latitude}&lng={longitude}`
 
 ## Installation
 
