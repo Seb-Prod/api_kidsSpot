@@ -19,10 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $lieux = new Lieux($db);
 
     // On récupère les coordonnées passées dans l'URL
-    $latitude = isset($_GET['lat']) ? floatval($_GET['lat']) : null;
-    $longitude = isset($_GET['lng']) ? floatval($_GET['lng']) : null;
+    $latitude = isset($_GET['lat']) ? filter_var($_GET['lat'], FILTER_VALIDATE_FLOAT) : null;
+    $longitude = isset($_GET['lng']) ? filter_var($_GET['lng'], FILTER_VALIDATE_FLOAT) : null;
 
-    if ($latitude !== null && $longitude !== null) {
+    if (
+        $latitude !== false && $longitude !== false &&
+        $latitude >= -90 && $latitude <= 90 &&
+        $longitude >= -180 && $longitude <= 180
+    ) {
+        $latitude = round($latitude, 6);
+        $longitude = round($longitude, 6);
         // Appel à la méthode avec géolocalisation
         $stmt = $lieux->lireGeolocal($latitude, $longitude);
 
@@ -34,24 +40,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 extract($row);
                 $unLieux = [
                     "id" => $id_lieu,
-                    "nom" => $nom_lieu,
-                    "latitude" => floatval($latitude),
-                    "longitude" => floatval($longitude),
-                    "distance_km" => round($row['distance'], 2),
+                    "nom" => json_decode('"' . $nom_lieu . '"'),
+                    "adresse" => [
+                        "adresse" => json_decode('"' . $adresse . '"'),
+                        "code_postal" => json_decode('"' . $code_postal . '"'),
+                        "ville" => json_decode('"' . $ville . '"'),
+                    ],
+                    "type" => json_decode('"' . $type_lieu . '"'),
+                    "est_evenement" => (bool)$est_evenement,
+                    "position" => [
+                        "latitude" => round(floatval($row['latitude']), 5),
+                        "longitude" => round(floatval($row['longitude']), 5),
+                        "distance_km" => round(floatval($row['distance']), 5)
+                    ],
+
                     "equipements" => array_map('trim', explode(',', $equipements))
                 ];
                 $tableauLieux['lieux'][] = $unLieux;
             }
 
             http_response_code(200);
-            echo json_encode($tableauLieux);
+            echo json_encode($tableauLieux, JSON_UNESCAPED_UNICODE);
         } else {
             http_response_code(404);
             echo json_encode(["message" => "Aucun lieu trouvé."]);
         }
     } else {
         http_response_code(400);
-        echo json_encode(["message" => "Latitude et longitude sont requises."]);
+        echo json_encode(["message" => "Latitude et longitude valides sont requises."]);
     }
 } else {
     // Méthode non autorisée
