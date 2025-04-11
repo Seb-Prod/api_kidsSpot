@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Appel à la méthode avec géolocalisation
     $stmt = $lieux->obtenirLieuxAutour($latitude, $longitude);
 
-    if ($stmt->rowCount() > 0) {
+    if ($stmt && $stmt->rowCount() > 0) {
         $tableauLieux = [];
         $tableauLieux['lieux'] = [];
 

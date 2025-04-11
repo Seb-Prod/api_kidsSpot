@@ -28,7 +28,7 @@ class Lieux
      * Obtenir un lieu par son identifiant unique
      *
      * @param [type] $id L'idendifiant unique du lieu à récupérer
-     * @return array|false Un tableau associatif contenant les informations du lieu si trouvé, ou `false` si aucun lieu ne correspond à l'ID fourni ou en cas d'erreur lors de l'exécution de la requête.
+     * @return PDOStatement|false Un objet PDOStatement si la requête s'exécute correctement, ou `false` en cas d'erreur
      */
     public function obtenirLieu($id)
     {
@@ -65,8 +65,13 @@ class Lieux
 
         $query = $this->connexion->prepare($sql);
         $query->bindParam(':id', $id);
-        $query->execute();
-        return $query;
+        
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     /**
@@ -74,7 +79,7 @@ class Lieux
      * 
      * @param float $latitude La latitude du point central autour duquel rechercher les lieux.
      * @param float $longitude La longitude du point central autour duquel rechercher les lieux.
-     * @return array|false Un tableau de tableaux associatifs contenant les informations des lieux trouvés,triés par distance croissante. Chaque sous-tableau représente un lieu. Ou `false` en cas d'erreur lors de l'exécution de la requête.
+     * @return PDOStatement|false Un objet PDOStatement si la requête s'exécute correctement, ou `false` en cas d'erreur
      */
     public function obtenirLieuxAutour($latitude, $longitude)
     {
@@ -118,8 +123,13 @@ class Lieux
         $query = $this->connexion->prepare($sql);
         $query->bindParam(':latitude', $latitude);
         $query->bindParam(':longitude', $longitude);
-        $query->execute();
-        return $query;
+        
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     /**

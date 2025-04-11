@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             // On récupère le lieu en fonction de l'ID
             $stmt = $lieux->obtenirLieu($id);
 
-            if ($stmt->rowCount() > 0) {
+            if ($stmt && $stmt->rowCount() > 0) {
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 // Initialisation du tableau
                

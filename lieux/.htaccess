@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Créer un lieu
+RewriteRule ^create$ create.php [L]
+
 # Lire un lieu spécifique par son ID
 RewriteRule ^([0-9]+)$ read.php?id=$1 [L,QSA]
 
