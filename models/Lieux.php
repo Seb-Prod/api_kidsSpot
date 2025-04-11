@@ -65,7 +65,7 @@ class Lieux
 
         $query = $this->connexion->prepare($sql);
         $query->bindParam(':id', $id);
-        
+
         try {
             $query->execute();
             return $query;
@@ -123,7 +123,7 @@ class Lieux
         $query = $this->connexion->prepare($sql);
         $query->bindParam(':latitude', $latitude);
         $query->bindParam(':longitude', $longitude);
-        
+
         try {
             $query->execute();
             return $query;
@@ -178,6 +178,31 @@ class Lieux
         // Exécution de la requête
         if ($query->execute()) {
             return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Supprimmerun lieu dans la base de données.
+     * 
+     * @return bool Retourne `true`si la suppression a réussi, `false`en cas d'échec.
+     */
+    public function supprimer()
+    {
+        $sql = "DELETE FROM lieux WHERE id=:id";
+
+        $query = $this->connexion->prepare($sql);
+
+        $this->id = htmlspecialchars(strip_tags($this->id));
+
+        $query->bindParam(":id", $this->id);
+
+        if ($query->execute()) {
+            // Vérifie si une ligne a été affectée
+            if ($query->rowCount() > 0) {
+                return true;
+            }
         }
 
         return false;
