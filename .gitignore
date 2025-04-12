@@ -11,5 +11,8 @@ Thumbs.db
 .idea/
 .vscode/
 
-# config
+# Config
 /config/config.php
+
+# Autre
+info.txt

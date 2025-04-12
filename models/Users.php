@@ -146,104 +146,109 @@ class Users
      * ou si aucun utilisateur avec cet ID n'a été trouvé.
      */
     public function modifier()
-    {
-        // Construction dynamique de la requête SQL pour ne mettre à jour que les champs fournis
-        $sql = "UPDATE users SET ";
-        $params = [];
+{
+    // Construction dynamique de la requête SQL
+    $sql = "UPDATE users SET ";
+    $params = [];
 
-        // Mise à jour conditionnelle des champs
-        if (!empty($this->pseudo)) {
-            $params[] = "pseudo = :pseudo";
-        }
-        if (!empty($this->mail)) {
-            $params[] = "mail = :mail";
-        }
-        if (!empty($this->telephone)) {
-            $params[] = "telephone = :telephone";
-        }
-        if (!empty($this->mot_de_passe)) {
-            $params[] = "mot_de_passe = :mot_de_passe";
-        }
-        if (!empty($this->grade)) {
-            $params[] = "grade = :grade";
-        }
-        if (!empty($this->tentatives_connexion)) {
-            $params[] = "tentatives_connexion = :tentatives_connexion";
-        }
-        if (!empty($this->compte_verrouille)) {
-            $params[] = "compte_verrouille = :compte_verrouille";
-        }
-        if (isset($this->date_verrouillage)) {
-            $params[] = "date_verrouillage = :date_verrouillage";
-        }
-        if (!empty($this->token_reinitialisation)) {
-            $params[] = "token_reinitialisation = :token_reinitialisation";
-        }
-        if (isset($this->date_expiration_token)) {
-            $params[] = "date_expiration_token = :date_expiration_token";
-        }
-
-        // Ajout automatique de la date de modification
-        $sql .= implode(", ", $params) . " WHERE id = :id";
-
-        $query = $this->connexion->prepare($sql);
-
-        // Nettoyage et sécurisation des données
-        $this->id = htmlspecialchars(strip_tags($this->id));
-
-        // Liaison conditionnelle des paramètres
-        $query->bindParam(":id", $this->id);
-
-        if (!empty($this->pseudo)) {
-            $this->pseudo = htmlspecialchars(strip_tags($this->pseudo));
-            $query->bindParam(":pseudo", $this->pseudo);
-        }
-        if (!empty($this->mail)) {
-            $this->mail = htmlspecialchars(strip_tags($this->mail));
-            $query->bindParam(":mail", $this->mail);
-        }
-        if (!empty($this->telephone)) {
-            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
-            $query->bindParam(":telephone", $this->telephone);
-        }
-        if (!empty($this->mot_de_passe)) {
-            // Hachage du mot de passe avant mise à jour
-            $this->mot_de_passe = password_hash($this->mot_de_passe, PASSWORD_DEFAULT);
-            $query->bindParam(":mot_de_passe", $this->mot_de_passe);
-        }
-        if (!empty($this->grade)) {
-            $this->grade = htmlspecialchars(strip_tags($this->grade));
-            $query->bindParam(":grade", $this->grade);
-        }
-        if (!empty($this->tentatives_connexion)) {
-            $this->tentatives_connexion = htmlspecialchars(strip_tags($this->tentatives_connexion));
-            $query->bindParam(":tentatives_connexion", $this->tentatives_connexion);
-        }
-        if (!empty($this->compte_verrouille)) {
-            $this->compte_verrouille = htmlspecialchars(strip_tags($this->compte_verrouille));
-            $query->bindParam(":compte_verrouille", $this->compte_verrouille);
-        }
-        if (isset($this->date_verrouillage)) {
-            $query->bindParam(":date_verrouillage", $this->date_verrouillage);
-        }
-        if (!empty($this->token_reinitialisation)) {
-            $this->token_reinitialisation = htmlspecialchars(strip_tags($this->token_reinitialisation));
-            $query->bindParam(":token_reinitialisation", $this->token_reinitialisation);
-        }
-        if (isset($this->date_expiration_token)) {
-            $query->bindParam(":date_expiration_token", $this->date_expiration_token);
-        }
-
-        // Exécution de la requête
-        if ($query->execute()) {
-            // Vérifie si une ligne a été affectée
-            if ($query->rowCount() > 0) {
-                return true;
-            }
-        }
-
-        return false;
+    // Mise à jour conditionnelle des champs
+    if (!empty($this->pseudo)) {
+        $params[] = "pseudo = :pseudo";
     }
+    if (!empty($this->mail)) {
+        $params[] = "mail = :mail";
+    }
+    if (!empty($this->telephone)) {
+        $params[] = "telephone = :telephone";
+    }
+    if (!empty($this->mot_de_passe)) {
+        $params[] = "mot_de_passe = :mot_de_passe";
+    }
+    if (!empty($this->grade)) {
+        $params[] = "grade = :grade";
+    }
+    if (isset($this->tentatives_connexion)) { // Modifié de !empty à isset
+        $params[] = "tentatives_connexion = :tentatives_connexion";
+    }
+    if (isset($this->derniere_connexion)) { // Ajouté pour derniere_connexion
+        $params[] = "derniere_connexion = :derniere_connexion";
+    }
+    if (isset($this->compte_verrouille)) { // Modifié de !empty à isset
+        $params[] = "compte_verrouille = :compte_verrouille";
+    }
+    if (isset($this->date_verrouillage)) {
+        $params[] = "date_verrouillage = :date_verrouillage";
+    }
+    if (!empty($this->token_reinitialisation)) {
+        $params[] = "token_reinitialisation = :token_reinitialisation";
+    }
+    if (isset($this->date_expiration_token)) {
+        $params[] = "date_expiration_token = :date_expiration_token";
+    }
+
+    // Vérifier si des champs ont été spécifiés pour mise à jour
+    if (empty($params)) {
+        return false; // Aucun champ à mettre à jour, ne pas exécuter la requête
+    }
+
+    // Ajout des champs à mettre à jour
+    $sql .= implode(", ", $params) . " WHERE id = :id";
+
+    $query = $this->connexion->prepare($sql);
+
+    // Nettoyage et sécurisation des données
+    $this->id = htmlspecialchars(strip_tags($this->id));
+
+    // Liaison conditionnelle des paramètres
+    $query->bindParam(":id", $this->id);
+
+    if (!empty($this->pseudo)) {
+        $this->pseudo = htmlspecialchars(strip_tags($this->pseudo));
+        $query->bindParam(":pseudo", $this->pseudo);
+    }
+    if (!empty($this->mail)) {
+        $this->mail = htmlspecialchars(strip_tags($this->mail));
+        $query->bindParam(":mail", $this->mail);
+    }
+    if (!empty($this->telephone)) {
+        $this->telephone = htmlspecialchars(strip_tags($this->telephone));
+        $query->bindParam(":telephone", $this->telephone);
+    }
+    if (!empty($this->mot_de_passe)) {
+        $this->mot_de_passe = password_hash($this->mot_de_passe, PASSWORD_DEFAULT);
+        $query->bindParam(":mot_de_passe", $this->mot_de_passe);
+    }
+    if (!empty($this->grade)) {
+        $this->grade = htmlspecialchars(strip_tags($this->grade));
+        $query->bindParam(":grade", $this->grade);
+    }
+    if (isset($this->tentatives_connexion)) {
+        $query->bindParam(":tentatives_connexion", $this->tentatives_connexion);
+    }
+    if (isset($this->derniere_connexion)) {
+        $query->bindParam(":derniere_connexion", $this->derniere_connexion);
+    }
+    if (isset($this->compte_verrouille)) {
+        $query->bindParam(":compte_verrouille", $this->compte_verrouille);
+    }
+    if (isset($this->date_verrouillage)) {
+        $query->bindParam(":date_verrouillage", $this->date_verrouillage);
+    }
+    if (!empty($this->token_reinitialisation)) {
+        $this->token_reinitialisation = htmlspecialchars(strip_tags($this->token_reinitialisation));
+        $query->bindParam(":token_reinitialisation", $this->token_reinitialisation);
+    }
+    if (isset($this->date_expiration_token)) {
+        $query->bindParam(":date_expiration_token", $this->date_expiration_token);
+    }
+
+    // Exécution de la requête
+    if ($query->execute()) {
+        return true;
+    }
+
+    return false;
+}
 
     /**
      * Obtenir un utilisateur par son identifiant unique.
@@ -283,5 +288,25 @@ class Users
         } catch (PDOException $e) {
             return false;
         }
+    }
+    
+    /**
+     * Rechercher un utilisateur par son adresse email.
+     * 
+     * @param string $email L'adresse email à rechercher.
+     * @return PDOStatement Le résultat de la requête.
+     */
+    public function rechercherParEmail($email)
+    {
+        $sql = "SELECT id, mail, mot_de_passe, grade, compte_verrouille, tentatives_connexion 
+            FROM users 
+            WHERE mail = :mail";
+
+        $query = $this->connexion->prepare($sql);
+        $email = htmlspecialchars(strip_tags($email));
+        $query->bindParam(':mail', $email);
+        $query->execute();
+
+        return $query;
     }
 }

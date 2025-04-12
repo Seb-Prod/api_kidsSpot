@@ -20,6 +20,25 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+// Inclusion du middleware d'authentification
+include_once '../middleware/auth_middleware.php';
+
+// Vérification de l'authentification
+$donnees_utilisateur = verifierAuthentification();
+
+if (!$donnees_utilisateur) {
+    http_response_code(401);
+    echo json_encode(["message" => "Accès non autorisé. Veuillez vous connecter."]);
+    exit;
+}
+
+// Vérification du niveau d'autorisation (par exemple, grade 2 minimum pour créer un lieu)
+if (!verifierAutorisation($donnees_utilisateur, 2)) {
+    http_response_code(403);
+    echo json_encode(["message" => "Vous n'avez pas les droits suffisants pour effectuer cette action."]);
+    exit;
+}
+
 // --- Vérification de la Méthode HTTP ---
 
 // On s'assure que la requête HTTP reçue par le serveur est bien de type POST.

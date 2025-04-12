@@ -5,15 +5,28 @@ API RESTful permettant d'accéder à des informations sur des lieux et événeme
 ## Structure du projet
 
 ```
-api_kidsSpot/
+kidsSpot/
 ├── config/
 │   ├── config.php          # Configuration de la base de données
 │   └── Database.php        # Classe de connexion à la base de données
+|   └── JWT.php             # Classe pour gérer les tokens JWT
+├── documentation/
+|
+|
+├── errors/
+│   ├── 400.php
+│   ├── 404.php 
+├── middleware/
+│   ├── auth_middleware.php # Middleware de vérification d'authentification.
 ├── models/
 │   └── Lieux.php           # Modèle pour les lieux
+│   └── Users.php           # Modèle pour les utilisateurs
 ├── lieux/
-│   ├── lire.php            # Point d'entrée pour obtenir un lieu spécifique
+│   ├── read.php            # Point d'entrée pour obtenir un lieu spécifique
 │   └── readAll.php         # Point d'entrée pour obtenir les lieux autour d'une position
+│   └── create.php          # Point d'entrée pour ajouter un lieu
+│   └── delete.php          # Point d'entrée pour suprimer un lieu
+│   └── update.php          # Point d'entrée pour modifier un lieu
 └── .htaccess               # Configuration des URL amicales
 ```
 
