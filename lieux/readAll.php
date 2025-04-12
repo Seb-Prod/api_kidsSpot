@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Endpoint API pour récupérer une liste de lieux situés autour de coordonnées géographiques spécifiées.
@@ -145,7 +146,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     // Si la méthode de la requête HTTP n'est pas GET, on envoie un code de réponse HTTP 405 (Method Not Allowed).
     http_response_code(405);
-
     // Et on retourne un message JSON indiquant que la méthode n'est pas autorisée pour cet endpoint.
     echo json_encode(["message" => "La méthode n'est pas autorisée"]);
 }
