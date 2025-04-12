@@ -1,4 +1,4 @@
-# Documentation de l'API de recherche de lieux
+# Documentation de l'API de recherche de lieux autour
 
 ## Endpoint: GET `/autour/{lat}/{lng}`
 

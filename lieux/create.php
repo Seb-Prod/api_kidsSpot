@@ -1,29 +1,51 @@
 <?php
-// Headers requis
+
+/**
+ * @file
+ * API Endpoint pour la création d'un nouveau lieu.
+ *
+ * Gère les requêtes HTTP POST. Le corps de la requête doit contenir un JSON avec les informations
+ * du nouveau lieu à créer. Retourne un statut HTTP et un message JSON indiquant le succès
+ * ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
+ *
+ * @date 2025-04-12
+ * @author Votre Nom <votre.email@example.com>
+ */
+
+// --- Configuration des Headers HTTP ---
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// On s'assure que la requête envoyée au serveur est bien de type POST.
+// --- Vérification de la Méthode HTTP ---
+
+// On s'assure que la requête HTTP reçue par le serveur est bien de type POST.
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // --- Inclusion des Fichiers Nécessaires ---
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
 
-    // On instancie la base de données
+    // --- Instanciation des Objets ---
+
+    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
     $db = $database->getConnexion();
 
-    // On instancie les lieux
+    // Crée une nouvelle instance de la classe Lieux, en passant l'objet de connexion à la base de données comme dépendance.
     $lieux = new Lieux($db);
 
-    // On récupère les informations envoyés
+    // --- Récupération des Données Envoyées ---
+
+
     // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
     $donnees = json_decode(file_get_contents("php://input"));
 
-    // Liste des champs requis avec leurs règles de validation
-    // Ce tableau définit les champs attendus et une fonction de validation pour chacun.
+    // --- Validation des Données Reçues ---
+
+    // Liste des champs requis avec leurs règles de validation (fonctions anonymes).
     $validation_regles = [
         'nom' => function ($val) {
             return !empty($val) && is_string($val) && strlen($val) <= 150;
@@ -57,46 +79,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     ];
 
-    // Vérification de la validité de tous les champs
+    // Tableau pour stocker les erreurs de validation.
     $erreurs = [];
+    // Parcours des règles de validation pour chaque champ.
     foreach ($validation_regles as $champ => $regle) {
-        // Pour chaque champ, on vérifie s'il existe dans les données reçues et si la règle de validation est respectée.
+        // Vérifie si le champ existe dans les données reçues et si la règle de validation est respectée.
         if (!isset($donnees->$champ) || !$regle($donnees->$champ)) {
-            // Si la validation échoue, on ajoute le nom du champ au tableau des erreurs.
+            // Si la validation échoue, ajoute le nom du champ au tableau des erreurs.
             $erreurs[] = $champ;
         }
     }
 
-    // Si aucune erreur n'a été détectée lors de la validation
+    // --- Création du Lieu si les Données sont Valides ---
+
+    // Si aucune erreur de validation n'a été détectée.
     if (empty($erreurs)) {
         // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
         foreach (array_keys($validation_regles) as $champ) {
             $lieux->$champ = $donnees->$champ;
         }
 
-        // On assigne les dates de création et de modification à la date actuelle.
+        // Assignation des dates de création et de modification à la date actuelle.
         $lieux->date_creation = date('Y-m-d');
         $lieux->date_modification = date('Y-m-d');
 
+        // Tentative de création du lieu dans la base de données.
         if ($lieux->creer()) {
-            // Si la création a réussi, on envoie un code de réponse 201 (Créé) et un message JSON de succès.
+            // Si la création a réussi, envoie un code de réponse HTTP 201 (Created) et un message JSON de succès.
             http_response_code(201);
             echo json_encode(["message" => "L'ajout a été effectué"]);
         } else {
-            // Si la création a échoué, on envoie un code de réponse 503 (Service Unavailable) et un message JSON d'échec.
+            // Si la création a échoué, envoie un code de réponse HTTP 503 (Service Unavailable) et un message JSON d'échec.
             http_response_code(503);
             echo json_encode(["message" => "L'ajout n'a pas été effectué"]);
         }
     } else {
-        // Si des erreurs de validation ont été détectées, on envoie un code de réponse 400 (Bad Request) et un message JSON contenant la liste des champs invalides.
+        // --- Gestion des Erreurs de Validation ---
+
+        // Si des erreurs de validation ont été détectées, envoie un code de réponse HTTP 400 (Bad Request) et un message JSON contenant la liste des champs invalides.
         http_response_code(400);
         echo json_encode([
-            "message" => "Données invalides.",
+            "message" => "Les données fournies sont invalides.",
             "erreurs" => $erreurs,
         ]);
     }
 } else {
-    // Gestion de l'erreur si la méthode HTTP utilisée n'est pas POST
-    http_response_code(405);
+    // --- Gestion des Méthodes HTTP Non Autorisées ---
+
+    // Si la méthode de la requête HTTP n'est pas POST, envoie un code de réponse HTTP 405 (Method Not Allowed) et un message JSON indiquant que la méthode n'est pas autorisée.    http_response_code(405);
     echo json_encode(["message" => "La méthode n'est pas autorisée"]);
 }
