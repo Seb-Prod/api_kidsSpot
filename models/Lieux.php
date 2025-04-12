@@ -1,34 +1,107 @@
 <?php
+
+/**
+ * @file
+ * Modèle de la classe Lieux.
+ *
+ * Cette classe fournit des méthodes pour interagir avec la table 'lieux' de la base de données,
+ * incluant la récupération d'un lieu par ID, la récupération des lieux autour de coordonnées
+ * géographiques, la création d'un nouveau lieu et la suppression d'un lieu.
+ */
 class Lieux
 {
-    // connexion
+    /**
+     * @var PDO $connexion Instance de connexion à la base de données.
+     */
     private $connexion;
 
-    // object properties
+    /**
+     * @var int $id Identifiant unique du lieu.
+     */
     public $id;
+    
+    /**
+     * @var string $nom Nom du lieu.
+     */
     public $nom;
+    
+    /**
+     * @var string $description Description du lieu (peut être null).
+     */
     public $description;
+    
+    /**
+     * @var string $adresse Adresse du lieu.
+     */
     public $adresse;
+    
+    /**
+     * @var string $ville Ville du lieu.
+     */
     public $ville;
+    
+    /**
+     * @var string $code_postal Code postal du lieu.
+     */
     public $code_postal;
+   
+    /**
+     * @var float $latitude Latitude du lieu.
+     */
     public $latitude;
+    
+    /**
+     * @var float $longitude Longitude du lieu.
+     */
     public $longitude;
+    
+    /**
+     * @var string $telephone Numéro de téléphone du lieu (peut être null).
+     */
     public $telephone;
+    
+    /**
+     * @var string $site_web Site web du lieu (peut être null).
+     */
     public $site_web;
+    
+    /**
+     * @var string $date_creation Date de création du lieu (format Y-m-d).
+     */
     public $date_creation;
+    
+    /**
+     * @var string $date_modification Date de dernière modification du lieu (format Y-m-d).
+     */
     public $date_modification;
+    
+    /**
+     * @var int $id_type Identifiant du type de lieu, clé étrangère vers la table 'types_lieux'.
+     */
     public $id_type;
 
+    /**
+     * Constructeur de la classe Lieux.
+     *
+     * Initialise l'instance de connexion à la base de données.
+     *
+     * @param PDO $db Instance de connexion PDO.
+     */
     public function __construct($db)
     {
         $this->connexion = $db;
     }
 
     /**
-     * Obtenir un lieu par son identifiant unique
+     * Obtenir un lieu par son identifiant unique.
      *
-     * @param [type] $id L'idendifiant unique du lieu à récupérer
-     * @return PDOStatement|false Un objet PDOStatement si la requête s'exécute correctement, ou `false` en cas d'erreur
+     * Effectue une requête SQL pour récupérer les informations d'un lieu spécifique en utilisant son ID.
+     * Inclut également le nom du type de lieu, un indicateur si le lieu est un événement,
+     * la liste des équipements associés et les dates de début et de fin pour les événements.
+     *
+     * @param int $id L'identifiant unique du lieu à récupérer.
+     * @return PDOStatement|false Un objet PDOStatement contenant le résultat de la requête si elle réussit,
+     * ou `false` en cas d'erreur d'exécution.
      */
     public function obtenirLieu($id)
     {
@@ -76,10 +149,16 @@ class Lieux
 
     /**
      * Obtenir une liste des lieux situés autour d'une latitude et d'une longitude données, triés par distance croissante.
-     * 
+     *
+     * Effectue une requête SQL pour sélectionner les lieux dans un rayon donné autour des coordonnées fournies.
+     * La distance est calculée en utilisant la formule haversine. Les résultats sont triés par ordre de distance croissante.
+     * Inclut également le nom du type de lieu, un indicateur si le lieu est un événement,
+     * la liste des équipements associés et les dates de début et de fin pour les événements.
+     *
      * @param float $latitude La latitude du point central autour duquel rechercher les lieux.
      * @param float $longitude La longitude du point central autour duquel rechercher les lieux.
-     * @return PDOStatement|false Un objet PDOStatement si la requête s'exécute correctement, ou `false` en cas d'erreur
+     * @return PDOStatement|false Un objet PDOStatement contenant le résultat de la requête si elle réussit,
+     * ou `false` en cas d'erreur d'exécution.
      */
     public function obtenirLieuxAutour($latitude, $longitude)
     {
@@ -135,6 +214,10 @@ class Lieux
     /**
      * Créer un nouveau lieu dans la base de données.
      *
+     * Prépare et exécute une requête SQL d'insertion pour ajouter un nouveau lieu
+     * avec les informations fournies dans les propriétés de l'objet.
+     * Les données sont nettoyées et sécurisées avant l'insertion.
+     *
      * @return bool Retourne `true` si l'insertion a réussi, `false` en cas d'échec.
      */
     public function creer()
@@ -184,9 +267,14 @@ class Lieux
     }
 
     /**
-     * Supprimmerun lieu dans la base de données.
-     * 
-     * @return bool Retourne `true`si la suppression a réussi, `false`en cas d'échec.
+     * Supprimer un lieu de la base de données en fonction de son ID.
+     *
+     * Prépare et exécute une requête SQL de suppression pour retirer un lieu spécifique
+     * en utilisant l'ID stocké dans la propriété `$this->id`.
+     * L'ID est nettoyé et sécurisé avant l'exécution de la requête.
+     *
+     * @return bool Retourne `true` si la suppression a réussi (au moins une ligne a été affectée),
+     * `false` en cas d'échec ou si aucun lieu avec cet ID n'a été trouvé.
      */
     public function supprimer()
     {
