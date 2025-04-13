@@ -85,8 +85,9 @@ L'API effectue une validation des données reçues selon les règles suivantes :
 ### Notes techniques
 
 - Les dates de création et de modification sont automatiquement définies à la date actuelle
-- L'id de l'user est récupérer lors de sa connection
+- L'id de l'user est récupérer lors de sa connection par un token qui doit etre envoyé
 - Seul les users connecté peuvent ajouter et noter un lieu
+- Un user ne peu commenter et noter q'une fois un lieu
 - Les résultats sont renvoyés au format JSON avec encodage UTF-8
 - L'API prend en charge les requêtes CORS (Cross-Origin Resource Sharing)
 - Seules les requêtes POST sont acceptées sur cet endpoint

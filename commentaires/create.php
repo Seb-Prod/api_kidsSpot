@@ -2,7 +2,7 @@
 
 /**
  * @file
- * API Endpoint l'ajout d'un commentaire et d'une note sur un lieu par un utilisateur.
+ * API Endpoint pour l'ajout d'un commentaire et d'une note sur un lieu par un utilisateur.
  *
  * Gère les requêtes HTTP POST. Le corps de la requête doit contenir un JSON avec les informations du nouveau commentaire et note sur un lieu. Retourne un statut HTTP et un message JSON indiquant le succès ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
  *
