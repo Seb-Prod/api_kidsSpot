@@ -3,8 +3,8 @@ RewriteEngine On
 # Ajouter un commentaire et une note
 RewriteRule ^ajout$ create.php [L]
 
-# Supprimer un lieu
-#RewriteRule ^supprime$ delete.php [L]
+# Supprimer un commentaire et une note
+#RewriteRule ^supprimer$ delete.php [L]
 
 # Lire un lieu spécifique par son ID
 #RewriteRule ^([0-9]+)$ read.php?id=$1 [L,QSA]

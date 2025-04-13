@@ -39,14 +39,28 @@ cd kidsSpot
 ```
 📦kidsSpot/
 ┣ 📂 config/
-┃ ┗ config.php              # Configuration de la base de données
-┃ ┗ Database.php            # Classe de connexion à la base de données
-┃ ┗ JWT.php                 # Classe pour gérer les tokens JWT
-┃ ┗ config.development.php  # Configuration environement de dévelopement
-┃ ┗ config.production.php   # Configuration environement de production
-├── documentation/
-|
-|
+┃   ┗ config.php                # Configuration de la base de données
+┃   ┗ Database.php              # Classe de connexion à la base de données
+┃   ┗ JWT.php                   # Classe pour gérer les tokens JWT
+┃   ┗ config.development.php    # Configuration environement de dévelopement
+┃   ┗ config.production.php     # Configuration environement de production
+┣ 📂 documentation/
+┃   ┗ 📂 endPoints
+┃       ┗ 📂 commentaires
+┃           ┗ create.md
+┃           ┗ read.md
+┃           ┗ readAll.md
+┃           ┗ update.md
+┃           ┗ delete.md
+┃ 
+┣ 📂 commentaires/
+┃   ┗ create.php                # EndPoint pour ajouter
+┃   ┗ read.php                  # EndPoind pour lire un
+┃   ┗ readAll.php               # EndPoind pour tous lire
+┃   ┗ update.php                # EndPoint pour la modification
+┃   ┗ delete.php                # EndPoint pour la suppression
+
+
 ├── errors/
 │   ├── 400.php
 │   ├── 404.php 
@@ -66,3 +80,5 @@ cd kidsSpot
 
 ## 📚 Documentation Technique
 - [Configuration (connexion à la base de données)](documentation/doc-config/config.md)
+- [EndPoint - commentaires - Ajout d’un commentaire et d’une note](documentation/endPoints/commentaires/create.md)
+- [EndPoint - commentaires - Suppression de commentaire et de note](documentation/endPoints/commentaires/delete.md)

@@ -1,26 +1,52 @@
-# Documentation de l'API d'ajout de commentaires et de note'
+# 📌 Documentation de l’API — Ajout d’un commentaire et d’une note
 
 ## Endpoint: POST `/commentaires/ajout`
 
-Cet endpoint permet d'ajouter un commentaire et une note par un user sur un lieu dans la base de données.
+Cet endpoint permet à un utilisateur connecté d’ajouter un commentaire et une note sur un lieu.
 
-### URL
+### 🧭 URL
 
 ```
 POST /kidsspot/commentaires/ajout
 ```
 
-### Corps de la requête
+### 🔐 Authentification requise
 
-La requête doit contenir un objet JSON avec les informations du lieu à créer.
+Cet endpoint nécessite une authentification via Bearer Token.
+
+L’utilisateur doit être connecté et transmettre le token dans l’en-tête HTTP suivant :
+
+```
+Authorization: Bearer VOTRE_TOKEN_ICI
+```
+Exemple :
+```
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+```
+👉 Si le token est manquant ou invalide, l’API renverra une réponse :
+```json
+{
+  "message": "Accès non autorisé. Veuillez vous connecter."
+}
+```
+👉 Si le grade de l'user n'est pas suffisant, l’API renverra une réponse :
+```json
+{
+  "message": "Vous n'avez pas les droits suffisants pour effectuer cette action."
+}
+```
+
+### 💾 Corps de la requête
+
+La requête doit contenir un objet JSON avec les informations suivantes :
 
 | Champ           | Type    | Description                           | Obligatoire | Contrainte |
 |-----------------|---------|---------------------------------------|-------------|-----|
-| `id_lieu`       | Integer | Id du lieu                            | Oui         | Non vide |
-| `commentaire`   | String  | Commentaire sur le lieu de l'user                 | Oui         | Non vide |
-| `note`          | Integer | Note du lieu de l'user | Oui  | Valeur entre 0 et 5 |
+| `id_lieu`       | Integer | Identifiant du lieu concerné| Oui | Doit être un entier > 0 |
+| `commentaire`   | String  | Texte du commentaire utilisateur  | Oui         | Non vide |
+| `note`          | Integer | Note attribuée au lieu            | Oui  | Valeur entre 0 et 5 |
 
-### Exemple de requête
+### 💡 Exemple de requête
 
 ```json
 {
@@ -32,9 +58,9 @@ La requête doit contenir un objet JSON avec les informations du lieu à créer.
 }
 ```
 
-### Réponses
+### 💡 Réponses possibles
 
-#### Succès (201 Created)
+#### ✅ Succès - 201 Created
 
 ```json
 {
@@ -42,7 +68,7 @@ La requête doit contenir un objet JSON avec les informations du lieu à créer.
 }
 ```
 
-#### Erreur - Données invalides (400 Bad Request)
+#### ⚠️ Erreur — 400 Bad Request (Données invalides)
 
 ```json
 {
@@ -51,7 +77,7 @@ La requête doit contenir un objet JSON avec les informations du lieu à créer.
 }
 ```
 
-#### Erreur - Doublon (409 Conflict)
+#### ⚠️ Erreur — 409 Conflict (Doublon)
 
 ```json
 {
@@ -59,7 +85,7 @@ La requête doit contenir un objet JSON avec les informations du lieu à créer.
 }
 ```
 
-#### Erreur - Échec de création (503 Service Unavailable)
+#### ⚠️ Erreur — 503 Service Unavailable (Échec technique)
 
 ```json
 {
@@ -67,7 +93,7 @@ La requête doit contenir un objet JSON avec les informations du lieu à créer.
 }
 ```
 
-#### Erreur - Méthode non autorisée (405 Method Not Allowed)
+#### ❌ Erreur — 405 Method Not Allowed (Mauvaise méthode HTTP)
 
 ```json
 {
@@ -75,19 +101,17 @@ La requête doit contenir un objet JSON avec les informations du lieu à créer.
 }
 ```
 
-### Validation des données
+#### 🧪 Validation des données
 
-L'API effectue une validation des données reçues selon les règles suivantes :
-- `id_lieu` : Non vide, valeur numérique
-- `commentaire` : Non vide, chaîne de caractères
-- `note` : Valeur numérique entre 0 et 5
+	•	id_lieu : Doit être un entier strictement positif.
+	•	commentaire : Doit être une chaîne non vide.
+	•	note : Doit être un nombre entre 0 et 5.
 
-### Notes techniques
+#### 📜 Règles métier
 
-- Les dates de création et de modification sont automatiquement définies à la date actuelle
-- L'id de l'user est récupérer lors de sa connection par un token qui doit etre envoyé
-- Seul les users connecté peuvent ajouter et noter un lieu
-- Un user ne peu commenter et noter q'une fois un lieu
-- Les résultats sont renvoyés au format JSON avec encodage UTF-8
-- L'API prend en charge les requêtes CORS (Cross-Origin Resource Sharing)
-- Seules les requêtes POST sont acceptées sur cet endpoint
+	•	L’utilisateur doit être connecté pour utiliser cet endpoint.
+	•	Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
+	•	Les dates sont gérées automatiquement par la base via NOW().
+	•	Tous les retours sont au format JSON encodé UTF-8.
+	•	L’API supporte CORS.
+	•	Seules les requêtes POST sont autorisées.

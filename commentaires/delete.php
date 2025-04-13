@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         }
 
         // Vérification si un commentaire existe
-        if(!$commentaire->exists()){
+        if (!$commentaire->exists()) {
             http_response_code(404);
             echo json_encode(["message" => "Ce commentaire n'existe pas."]);
             exit;
@@ -89,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         // Assignation de l'id de l'user
         $commentaire->id_user = $donnees_utilisateur['id'];
 
-        // Vérification si s'est l'auteur du commentaire ou d'un admin
-        if ($commentaire->getUserIdByCommentId($commentaire->id) === $donnees_utilisateur['id'] || $donnees_utilisateur['grade'] != 4) {
+        // Si l'utilisateur n'est PAS l'auteur ET que ce n'est PAS un admin (grade 4) → interdiction
+        if (!$commentaire->peutSupprimer($donnees_utilisateur['id'], $donnees_utilisateur['grade'])) {
             http_response_code(403);
             echo json_encode(["message" => "Vous n'avez pas les droits pour effectuer cette action."]);
             exit;
@@ -114,6 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         ]);
     }
 } else {
-    // Si la méthode de la requête HTTP n'est pas POST, envoie un code de réponse HTTP 405 (Method Not Allowed)
+    // Si la méthode de la requête HTTP n'est pas DELETE, envoie un code de réponse HTTP 405 (Method Not Allowed)
     echo json_encode(["message" => "La méthode n'est pas autorisée"]);
 }

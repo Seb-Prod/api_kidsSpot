@@ -132,7 +132,7 @@ class Commentaires
      * Récupération de l'id de l'user qui à émis le commentaire
      *
      * @param integer $id_commentaire
-     * @return void
+     * @return integer | null
      */
     public function getUserIdByCommentId($id_commentaire) {
         $sql = "SELECT id_user FROM commentaires WHERE id = :id_commentaire";
@@ -146,6 +146,24 @@ class Commentaires
         }
     
         return null; // Aucun commentaire trouvé
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param integer $id_user_connecte
+     * @param integer $grade_user_connecte
+     * @return boolean
+     */
+    public function peutSupprimer($id_user_connecte, $grade_user_connecte) {
+        // Récupérer l'auteur du commentaire
+        $userIdAuteur = $this->getUserIdByCommentId($this->id);
+    
+        // Autoriser si : auteur ou admin
+        if ($userIdAuteur === $id_user_connecte || $grade_user_connecte == 4) {
+            return true;
+        }
+        return false;
     }
 
     
