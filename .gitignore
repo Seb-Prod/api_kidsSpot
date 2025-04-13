@@ -2,6 +2,7 @@
 *.log
 *.cache
 *.tmp
+/temp
 
 # Fichiers système
 .DS_Store
@@ -12,4 +13,3 @@ Thumbs.db
 .vscode/
 
 # config
-/config/config.php
