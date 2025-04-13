@@ -57,7 +57,7 @@ La requête doit contenir un objet JSON avec l’ID du commentaire à supprimer.
 
 ### 💡 Réponses possibles
 
-#### ✅ Succès - 200 (OK)
+#### ✅ Succès - 200 OK (OK)
 
 ```json
 {
@@ -71,6 +71,14 @@ La requête doit contenir un objet JSON avec l’ID du commentaire à supprimer.
 {
   "message": "Les données fournies sont invalides.",
   "erreurs": ["id"]
+}
+```
+
+#### ⚠️ Erreur — 403 Forbidden (droit insufisant)
+
+```json
+{
+  "message": "Vous n'avez pas les droits pour effectuer cette action."
 }
 ```
 

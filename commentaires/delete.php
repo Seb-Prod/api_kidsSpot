@@ -4,7 +4,7 @@
  * @file
  * API Endpoint pour la suppression d'un commentaire et d'une note sur un lieu par l'utilisateur.
  *
- * Gère les requêtes HTTP POST. Le corps de la requête doit contenir un JSON avec l'id du commentaire à supprimer. Seul l'auteur ou un administrateur peut supprimer un commentaire. Retourne un statut HTTP et un message JSON indiquant le succès ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
+ * Gère les requêtes HTTP DELETE. Le corps de la requête doit contenir un JSON avec l'id du commentaire à supprimer. Seul l'auteur ou un administrateur peut supprimer un commentaire. Retourne un statut HTTP et un message JSON indiquant le succès ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
  *
  */
 
@@ -70,8 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         }
     }
 
-    // --- Création du Commentaire et de la note si les Données sont Valides ---
-
     // Si aucune erreur de validation n'a été détectée.
     if (empty($erreurs)) {
         // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
@@ -115,5 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     }
 } else {
     // Si la méthode de la requête HTTP n'est pas DELETE, envoie un code de réponse HTTP 405 (Method Not Allowed)
+    http_response_code(405);
     echo json_encode(["message" => "La méthode n'est pas autorisée"]);
 }

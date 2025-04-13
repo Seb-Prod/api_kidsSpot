@@ -82,3 +82,7 @@ cd kidsSpot
 - [Configuration (connexion à la base de données)](documentation/doc-config/config.md)
 - [EndPoint - commentaires - Ajout d’un commentaire et d’une note](documentation/endPoints/commentaires/create.md)
 - [EndPoint - commentaires - Suppression de commentaire et de note](documentation/endPoints/commentaires/delete.md)
+
+| Opération     | Méthode HTTP  | Token | Documentation |
+|---------------|---------------|-------|---------------|
+| Créer un commentaire | POST | Oui | [EndPoint](documentation/endPoints/commentaires/create.md)|

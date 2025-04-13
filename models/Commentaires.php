@@ -39,7 +39,6 @@ class Commentaires
      */
     public function create()
     {
-        // Correction du double égal (==) par un seul égal (=)
         $sql = "INSERT INTO commentaires SET id_lieu=:id_lieu, commentaire=:commentaire, 
             note=:note, id_user=:id_user, date_ajout=NOW()";
 
@@ -57,7 +56,6 @@ class Commentaires
         $query->bindParam(":commentaire", $this->commentaire);
         $query->bindParam(":note", $this->note);
         $query->bindParam(":id_user", $this->id_user);
-        // Suppression de la liaison avec date_ajout car NOW() est utilisé dans la requête
 
         // Exécution de la requête
         if ($query->execute()) {
@@ -70,7 +68,40 @@ class Commentaires
 
     public function read() {}
 
-    public function update() {}
+    /**
+     * Modifier un commentaire de la base de données en fonction de son ID.
+     *
+     * Prépare et exécute une requête SQL pour modifier un commentaire spécifique en utilisant l'ID stocké dans la propriété `$this->id`.
+     * L'ID est nettoyé et sécurisé avant l'exécution de la requête.
+     *
+     * @return bool Retourne `true` si la suppression a réussi (au moins une ligne a été affectée),
+     * `false` en cas d'échec ou si aucun commentaire avec cet ID n'a été trouvé.
+     */
+    public function update()
+    {
+        $sql = "UPDATE commentaires 
+        SET commentaire = :commentaire, note = :note, date_modification = NOW()
+        WHERE id = :id AND id_user = :id_user";
+
+        $query = $this->connexion->prepare($sql);
+
+        // Nettoyage et sécurisation des données
+        $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
+        $this->note = htmlspecialchars(strip_tags($this->note));
+
+        // Liaison des valeurs
+        $query->bindParam(":commentaire", $this->commentaire);
+        $query->bindParam(":note", $this->note);
+        $query->bindParam(":id_user", $this->id_user);
+        $query->bindParam(":id", $this->id);
+
+        // Exécution de la requête
+        if ($query->execute()) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Supprimer un commentaire de la base de données en fonction de son ID.
@@ -120,7 +151,8 @@ class Commentaires
      *
      * @return void
      */
-    public function exists(){
+    public function exists()
+    {
         $sql = "SELECT COUNT(*) FROM commentaires WHERE id = :id";
         $query = $this->connexion->prepare($sql);
         $query->bindParam(":id", $this->id);
@@ -134,17 +166,18 @@ class Commentaires
      * @param integer $id_commentaire
      * @return integer | null
      */
-    public function getUserIdByCommentId($id_commentaire) {
+    public function getUserIdByCommentId($id_commentaire)
+    {
         $sql = "SELECT id_user FROM commentaires WHERE id = :id_commentaire";
         $query = $this->connexion->prepare($sql);
         $query->bindParam(":id_commentaire", $id_commentaire);
         $query->execute();
-    
+
         if ($query->rowCount() > 0) {
             $row = $query->fetch(PDO::FETCH_ASSOC);
             return $row['id_user'];
         }
-    
+
         return null; // Aucun commentaire trouvé
     }
 
@@ -155,16 +188,15 @@ class Commentaires
      * @param integer $grade_user_connecte
      * @return boolean
      */
-    public function peutSupprimer($id_user_connecte, $grade_user_connecte) {
+    public function peutSupprimer($id_user_connecte, $grade_user_connecte)
+    {
         // Récupérer l'auteur du commentaire
         $userIdAuteur = $this->getUserIdByCommentId($this->id);
-    
+
         // Autoriser si : auteur ou admin
         if ($userIdAuteur === $id_user_connecte || $grade_user_connecte == 4) {
             return true;
         }
         return false;
     }
-
-    
 }
