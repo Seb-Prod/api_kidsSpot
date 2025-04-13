@@ -3,7 +3,6 @@
 *.cache
 *.tmp
 /temp
-/temp
 
 # Fichiers système
 .DS_Store
