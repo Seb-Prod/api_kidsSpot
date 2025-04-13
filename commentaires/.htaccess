@@ -1,0 +1,21 @@
+RewriteEngine On
+
+# Ajouter un commentaire et une note
+RewriteRule ^ajout$ create.php [L]
+
+# Supprimer un lieu
+#RewriteRule ^supprime$ delete.php [L]
+
+# Lire un lieu spécifique par son ID
+#RewriteRule ^([0-9]+)$ read.php?id=$1 [L,QSA]
+
+# Lire tous les lieux autour d'une latitude/longitude (ex: /autour/48.8566/2.3522)
+RewriteRule ^autour/(-?[0-9]{1,3}(?:\.[0-9]+)?)/(-?[0-9]{1,3}(?:\.[0-9]+)?)$ readAll.php?lat=$1&lng=$2 [L,QSA]
+
+# Si mauvaise syntaxe dans /autour/... → rediriger vers erreur 400 personnalisée
+RewriteCond %{REQUEST_URI} ^/kidsspot/lieux/autour/
+RewriteRule ^autour/.*$ /kidsspot/errors/400.php?reason=coords [L]
+
+# Gérer les erreurs
+ErrorDocument 404 /kidsspot/errors/404.php
+ErrorDocument 400 /kidsspot/errors/400.php

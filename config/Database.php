@@ -5,29 +5,10 @@
  */
 class Database
 {
-    /**
-     * @var string L'adresse de l'hôte de la base de données.
-     */
     private $host;
-
-    /**
-     * @var string Le nom de la base de données.
-     */
     private $db_name;
-
-    /**
-     * @var string Le nom d'utilisateur pour la connexion à la base de données.
-     */
     private $username;
-
-    /**
-     * @var string Le mot de passe pour la connexion à la base de données.
-     */
     private $password;
-
-    /**
-     * @var PDO|null L'objet de connexion PDO. Initialisé à null.
-     */
     public $connexion;
 
     /**
@@ -37,7 +18,7 @@ class Database
     public function __construct()
     {
         // Charger la configuration
-        $config = require_once(__DIR__ . '/config.php');
+        $config = require(__DIR__ . '/config.php');
 
         // Initialiser les propriétés à partir de la configuration
         $this->host = $config['host'];
@@ -59,7 +40,7 @@ class Database
             $this->connexion = new PDO(
                 "mysql:host=$this->host;dbname=$this->db_name;charset=utf8",
                 $this->username,
-                $this->password,
+                $this->password
             );
             // Configuration des erreurs PDO en mode exception pour une meilleure gestion
             $this->connexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

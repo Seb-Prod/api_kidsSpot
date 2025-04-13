@@ -58,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $user->modifier();
                 
                 // Générer le token JWT
-                $jwt = new JWT();
+                $config = require '../config/config.php';
+                $jwt = new JWT($config);
                 $token = $jwt->generer([
                     "id" => $id,
                     "email" => $email,

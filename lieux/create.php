@@ -58,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // --- Récupération des Données Envoyées ---
 
-
     // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
     $donnees = json_decode(file_get_contents("php://input"));
 

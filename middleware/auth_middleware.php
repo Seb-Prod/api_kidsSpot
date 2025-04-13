@@ -25,7 +25,8 @@ function verifierAuthentification() {
     }
     
     $token = $matches[1];
-    $jwt = new JWT();
+    $config = require '../config/config.php';
+    $jwt = new JWT($config);
     
     // Vérifier et décoder le token
     $donnees_token = $jwt->verifier($token);
