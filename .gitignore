@@ -13,3 +13,4 @@ Thumbs.db
 .vscode/
 
 # config
+/config/config.production.php
