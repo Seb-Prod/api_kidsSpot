@@ -183,6 +183,11 @@ Le token a une durée de validité limitée et devra être renouvelé périodiqu
 
 ## 📚 Documentation technique
 
+### Models
+| Models | Documentation |
+|--------|---------------|
+| Commentaires.php | [Documentation](documentation/models/Commentaires.md) |
+
 Pour plus de détails sur chaque endpoint, consultez les documents spécifiques dans le dossier `documentation/`:
 
 - [Configuration (connexion à la base de données)](documentation/doc-config/config.md)
