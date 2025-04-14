@@ -104,6 +104,39 @@ class Commentaires
     /**
      * Lire tous les commentaires sur un lieu par son ID
      */
+    public function readAll($id)
+    {
+        $sql = "SELECT 
+                c.id AS id_commentaire,
+                c.commentaire,
+                c.note,
+                c.date_ajout,
+                c.date_modification,
+                c.id_user,
+                u.pseudo AS pseudo_user,
+                c.id_lieu,
+                l.nom AS nom_lieu
+            FROM 
+                commentaires c
+            JOIN 
+                users u ON c.id_user = u.id
+            JOIN
+                lieux l ON c.id_lieu = l.id
+            WHERE 
+                c.id_lieu = :id_lieu
+            ORDER BY
+                c.date_ajout DESC";
+
+        $query = $this->connexion->prepare($sql);
+        $query->bindParam(':id_lieu', $id);
+
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
 
     /**
      * Modifier un commentaire de la base de données en fonction de son ID.
@@ -213,5 +246,28 @@ class Commentaires
             return true;
         }
         return false;
+    }
+
+    /**
+     * Récupère la moyenne des notes pour un lieu spécifique.
+     */
+    public function getMoyenneNotes($id_lieu)
+    {
+        $sql = "SELECT 
+            AVG(note) AS moyenne_notes
+        FROM 
+            commentaires
+        WHERE 
+            id_lieu = :id_lieu";
+
+        $query = $this->connexion->prepare($sql);
+        $query->bindParam(':id_lieu', $id_lieu);
+
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 }

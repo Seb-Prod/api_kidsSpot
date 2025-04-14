@@ -69,7 +69,7 @@ GET /kidsspot/commentaires/lire/4
 }
 ```
 
-#### ❌ Erreur — 404 Conflict (Commentaire introuvable)
+#### ❌ Erreur — 404 Not Found (Commentaire introuvable)
 
 ```json
 {

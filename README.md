@@ -165,7 +165,7 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 |----------|---------|-------------|------------------|---------------|
 | `/commentaires/ajouter` | POST | Ajoute un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/create.md) |
 | `/commentaires/lire/{id}` | GET | Détails d'un commentaire | Non | [Documentation](documentation/endPoints/commentaires/read.md) |
-| `/commentaires/lieu/{lieu_id}` | GET | Liste les commentaires d'un lieu | Non | [Documentation](documentation/endPoints/commentaires/readAll.md) |
+| `/commentaires/lire/lieu/{id}` | GET | Liste les commentaires d'un lieu | Non | [Documentation](documentation/endPoints/commentaires/readAll.md) |
 | `/commentaires/modifier` | PUT | Modifie un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/update.md) |
 | `/commentaires/supprimer` | DELETE | Supprime un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/delete.md) |
 
