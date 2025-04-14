@@ -57,8 +57,23 @@ class Favoris
     /**
      * Supprimer un favoris
      */
-    public function delete($id) {
-        
+    public function delete() {
+        $sql = "DELETE FROM favoris WHERE id_lieu=:id_lieu";
+
+        $query = $this->connexion->prepare($sql);
+
+        $this->id_lieu = htmlspecialchars(strip_tags($this->id_lieu));
+
+        $query->bindParam(":id_lieu", $this->id_lieu);
+
+        if ($query->execute()) {
+            // Vérifie si une ligne a été affectée
+            if ($query->rowCount() > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
