@@ -18,7 +18,7 @@ class Commentaires
     public $date_ajout;
 
     /**
-     * Constructeur de la classe Lieux.
+     * Constructeur de la classe Commentaires.
      *
      * Initialise l'instance de connexion à la base de données.
      *
@@ -31,11 +31,6 @@ class Commentaires
 
     /**
      * Créer un nouveau commentaire et note pour un lieu.
-     *
-     * Prépare et exécute une requête SQL d'insertion pour ajouter un commentaire sur un lieu et de le noter avec les informations fournies dans les propriétés de l'objet.
-     * Les données sont nettoyées et sécurisées avant l'insertion.
-     *
-     * @return bool Retourne `true` si l'insertion a réussi, `false` en cas d'échec.
      */
     public function create()
     {

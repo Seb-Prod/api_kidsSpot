@@ -1,0 +1,20 @@
+RewriteEngine On
+
+# Ajouter un commentaire et une note
+RewriteRule ^ajouter$ create.php [L]
+
+# Supprimer un commentaire et une note
+RewriteRule ^supprimer$ delete.php [L]
+
+#Modifier un commentaire et une note
+RewriteRule ^modifier$ update.php [L]
+
+# Lire un commentaire spécifique par son ID
+RewriteRule ^lire/([0-9]+)$ read.php?id=$1 [L,QSA]
+
+# Lire tous les commentaires sur un lieu par son ID
+RewriteRule ^lire/lieu/([0-9]+)$ readAll.php?id=$1 [L,QSA]
+
+# Gérer les erreurs
+ErrorDocument 404 /kidsspot/errors/404.php
+ErrorDocument 400 /kidsspot/errors/400.php

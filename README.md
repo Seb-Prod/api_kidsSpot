@@ -169,6 +169,14 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 | `/commentaires/modifier` | PUT | Modifie un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/update.md) |
 | `/commentaires/supprimer` | DELETE | Supprime un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/delete.md) |
 
+### Favoris
+
+| Endpoint | Méthode | Description | Authentification | Documentation |
+|----------|---------|-------------|------------------|---------------|
+| `/favoris/ajouter` | POST | Ajoute un favoris | Oui | [Documentation](documentation/endPoints/favoris/create.md) |
+| `/favoris` | GET | Liste tous les favoris | Oui | [Documentation](documentation/endPoints/favoris/read.md) |
+| `/favoris/supprimer` | DELETE | Supprime un favoris | Oui | [Documentation](documentation/endPoints/favoris/delete.md) |
+
 ## 🔐 Authentification
 
 L'API utilise l'authentification par token JWT (JSON Web Token). Pour les endpoints protégés:

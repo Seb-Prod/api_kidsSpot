@@ -1,14 +1,13 @@
 <?php
-
 /**
  * @file
- * API Endpoint pour l'ajout d'un commentaire et d'une note sur un lieu par un utilisateur.
+ * API Endpoint pour l'ajout d'un lieu en favorris par un utilisateur.
  *
- * Gère les requêtes HTTP POST. Le corps de la requête doit contenir un JSON avec les informations du nouveau commentaire et note sur un lieu. Retourne un statut HTTP et un message JSON indiquant le succès ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
+ * Gère les requêtes HTTP POST. Le corps de la requête doit contenir un JSON avec les l'id du lieu à ajouter. Retourne un statut HTTP et un message JSON indiquant le succès ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
  *
  */
 
-// Configuration des Headers HTTP
+ // Configuration des Headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
@@ -38,7 +37,7 @@ if (!verifierAutorisation($donnees_utilisateur, 1)) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // --- Inclusion des Fichiers Nécessaires ---
     include_once '../config/Database.php';
-    include_once '../models/Commentaires.php';
+    include_once '../models/Favoris.php';
 
     // --- Instanciation des Objets ---
 
@@ -46,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Commentaires, en passant l'objet de connexion à la base de données comme dépendance.
-    $commentaire = new Commentaires($db);
+    // Crée une nouvelle instance de la classe Favoris, en passant l'objet de connexion à la base de données comme dépendance.
+    $favoris = new Favoris($db);
 
     // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
     $donnees = json_decode(file_get_contents("php://input"));
@@ -56,12 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $validation_regles = [
         'id_lieu' => function ($val) {
             return is_numeric($val) && $val > 0;
-        },
-        'commentaire' => function ($val) {
-            return !empty($val) && is_string($val);
-        },
-        'note' => function ($val) {
-            return is_numeric($val) && $val >= 0 && $val < 6;
         }
     ];
 
@@ -76,28 +69,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // --- Création du Commentaire et de la note si les Données sont Valides ---
+    // --- Création d'un favoris si les Données sont Valides ---
 
     // Si aucune erreur de validation n'a été détectée.
     if (empty($erreurs)) {
         // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
         foreach (array_keys($validation_regles) as $champ) {
-            $commentaire->$champ = $donnees->$champ;
+            $favoris->$champ = $donnees->$champ;
         }
 
         // Assignation de l'id de l'user
-        $commentaire->id_user = $donnees_utilisateur['id'];
+        $favoris->id_user = $donnees_utilisateur['id'];
 
-        // Vérification si l'user à déjà commenté le lieu
-        if ($commentaire->alreadyExists()) {
-            // Si l'user à déjà mis un commentaire, envoie un code de réponse HTTP 409 (Conflict)
+        // Vérification si le lieu exite
+        if(!$favoris->exists()){
+            http_response_code(404);
+            echo json_encode(["message" => "Ce lieu n'existe pas."]);
+            exit;
+        }
+
+        // Vérification si l'user à déjà ajouté le lieu en favoris
+        if ($favoris->alreadyExists()) {
             http_response_code(409);
-            echo json_encode(["message" => "Vous avez déjà commenté ce lieu."]);
+            echo json_encode(["message" => "Vous avez déjà ajouté ce lieu."]);
             exit;
         }
 
         // Tentative de création du lieu dans la base de données.
-        if ($commentaire->create()) {
+        if ($favoris->create()) {
             // Si la création a réussi, envoie un code de réponse HTTP 201 (Created)
             http_response_code(201);
             echo json_encode(["message" => "L'ajout a été effectué"]);
@@ -114,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             "erreurs" => $erreurs,
         ]);
     }
+
 } else {
     // Si la méthode de la requête HTTP n'est pas POST, envoie un code de réponse HTTP 405 (Method Not Allowed)
     echo json_encode(["message" => "La méthode n'est pas autorisée"]);
