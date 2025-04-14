@@ -58,38 +58,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 $tableauLieux = [];
                 $tableauLieux['lieu'] = [
                     "id" => $row['id_lieu'],
-                    // Décode la chaîne JSON potentiellement encodée pour le nom.
                     "nom" => json_decode('"' . $row['nom_lieu'] . '"'),
-                    // Décode la chaîne JSON potentiellement encodée pour la description.
                     "description" => json_decode('"' . $row['description'] . '"'),
-                    // Décode la chaîne JSON potentiellement encodée pour le type de lieu.
+                    "horaires" => json_decode('"' . $row['horaires'] . '"'),
                     "adresse" => [
-                        // Décode la chaîne JSON potentiellement encodée pour l'adresse.
                         "adresse" => json_decode('"' . $row['adresse'] . '"'),
-                        // Décode la chaîne JSON potentiellement encodée pour la ville.
                         "ville" => json_decode('"' . $row['ville'] . '"'),
-                        // Décode la chaîne JSON potentiellement encodée pour le code postal.
                         "code_postal" => json_decode('"' . $row['code_postal'] . '"'),
-                        // Décode la chaîne JSON potentiellement encodée pour le téléphone.
                         "telephone" => json_decode('"' . $row['telephone'] . '"'),
-                        // Décode la chaîne JSON potentiellement encodée pour le site web.
                         "site_web" => json_decode('"' . $row['site_web'] . '"'),
                     ],
                     "type_lieu" => json_decode('"' . $row['type_lieu'] . '"'),
-                    // Convertit la valeur de 'est_evenement' en un booléen.
                     "est_evenement" => boolval($row['est_evenement']),
                     "date_evenement" => [
                         "debut" => $row['date_debut'],
                         "fin" => $row['date_fin']
                     ],
                     "position" => [
-                        // Convertit et arrondit la latitude à 5 décimales.
                         "latitude" => round(floatval($row['latitude']), 5),
-                        // Convertit et arrondit la longitude à 5 décimales.
                         "longitude" => round(floatval($row['longitude']), 5)
                     ],
-                    // Explose la chaîne des équipements en un tableau, en supprimant les espaces blancs autour de chaque équipement.
-                    "equipements" => array_map('trim', explode(',', $row['equipements']))
+                    // Ici, les JSON_OBJECT sont automatiquement transformés en tableau PHP
+                    "equipements" => $row['equipements'] ? json_decode('[' . $row['equipements'] . ']') : [],
+                    "ages" => $row['tranches_age'] ? json_decode('[' . $row['tranches_age'] . ']') : [],
+                    "commentaires" => $row['commentaires'] ? json_decode('[' . $row['commentaires'] . ']') : [],
+                    "note_moyenne" => floatval($row['note_moyenne']),
+                    "nombre_commentaires" => intval($row['nombre_commentaires'])
                 ];
                 // Envoie un code de réponse HTTP 200 (OK) indiquant que la requête a réussi.
                 http_response_code(200);

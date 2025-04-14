@@ -102,30 +102,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             // Définit la structure d'un tableau représentant un lieu individuel.
             $unLieux = [
                 "id" => $id_lieu,
-                // Décode les chaînes JSON potentiellement encodées pour les noms.
                 "nom" => json_decode('"' . $nom_lieu . '"'),
+                "horaires" => json_decode('"' . $horaires . '"'),
                 "adresse" => [
-                    // Décode les chaînes JSON potentiellement encodées pour l'adresse.
                     "adresse" => json_decode('"' . $adresse . '"'),
-                    // Décode les chaînes JSON potentiellement encodées pour le code postal.
                     "code_postal" => json_decode('"' . $code_postal . '"'),
-                    // Décode les chaînes JSON potentiellement encodées pour la ville.
                     "ville" => json_decode('"' . $ville . '"'),
                 ],
-                // Décode la chaîne JSON potentiellement encodée pour le type de lieu.
                 "type" => json_decode('"' . $type_lieu . '"'),
-                // Convertit la valeur de 'est_evenement' en un booléen.
                 "est_evenement" => (bool)$est_evenement,
                 "position" => [
-                    // Convertit et arrondit la latitude à 5 décimales.
                     "latitude" => round(floatval($row['latitude']), 5),
-                    // Convertit et arrondit la longitude à 5 décimales.
                     "longitude" => round(floatval($row['longitude']), 5),
-                    // Convertit et arrondit la distance à 5 décimales.
                     "distance_km" => round(floatval($row['distance']), 5)
                 ],
-                // Explose la chaîne des équipements en un tableau, en supprimant les espaces blancs autour de chaque équipement.
-                "equipements" => array_map('trim', explode(',', $equipements))
+                "equipements" => array_map('trim', explode(',', $equipements)),
+                "ages" => array_map('trim', explode(',', $tranches_age))
+
             ];
             // Ajoute le lieu formaté au tableau principal des lieux.
             $tableauLieux['lieux'][] = $unLieux;

@@ -19,62 +19,62 @@ class Lieux
      * @var int $id Identifiant unique du lieu.
      */
     public $id;
-    
+
     /**
      * @var string $nom Nom du lieu.
      */
     public $nom;
-    
+
     /**
      * @var string $description Description du lieu (peut être null).
      */
     public $description;
-    
+
     /**
      * @var string $adresse Adresse du lieu.
      */
     public $adresse;
-    
+
     /**
      * @var string $ville Ville du lieu.
      */
     public $ville;
-    
+
     /**
      * @var string $code_postal Code postal du lieu.
      */
     public $code_postal;
-   
+
     /**
      * @var float $latitude Latitude du lieu.
      */
     public $latitude;
-    
+
     /**
      * @var float $longitude Longitude du lieu.
      */
     public $longitude;
-    
+
     /**
      * @var string $telephone Numéro de téléphone du lieu (peut être null).
      */
     public $telephone;
-    
+
     /**
      * @var string $site_web Site web du lieu (peut être null).
      */
     public $site_web;
-    
+
     /**
      * @var string $date_creation Date de création du lieu (format Y-m-d).
      */
     public $date_creation;
-    
+
     /**
      * @var string $date_modification Date de dernière modification du lieu (format Y-m-d).
      */
     public $date_modification;
-    
+
     /**
      * @var int $id_type Identifiant du type de lieu, clé étrangère vers la table 'types_lieux'.
      */
@@ -106,35 +106,74 @@ class Lieux
     public function obtenirLieu($id)
     {
         $sql = "SELECT 
-        l.id AS id_lieu,
-        l.nom AS nom_lieu,
-        l.description,
-        l.latitude,
-        l.longitude,
-        l.adresse,
-        l.ville,
-        l.code_postal,
-        l.telephone,
-        site_web,
-        t.nom AS type_lieu,
-        CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS est_evenement,
-        GROUP_CONCAT(DISTINCT te.nom SEPARATOR ', ') AS equipements,
-        e.date_debut,
-        e.date_fin
-        FROM
-        lieux l
-        JOIN
-            types_lieux t ON l.id_type = t.id
-        LEFT JOIN
-            lieux_equipement le ON l.id = le.id_lieux
-        LEFT JOIN
-            types_equipement te ON le.id_equipement = te.id
-        LEFT JOIN
-            evenements e ON l.id = e.id_lieux
-        WHERE
-            l.id = :id
-        GROUP BY
-            l.id, e.id";
+    l.id AS id_lieu,
+    l.nom AS nom_lieu,
+    l.description,
+    l.latitude,
+    l.longitude,
+    l.adresse,
+    l.ville,
+    l.code_postal,
+    l.telephone,
+    l.site_web,
+    l.horaires,
+    t.nom AS type_lieu,
+    CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS est_evenement,
+
+    -- Equipements : id + nom sous forme JSON
+    GROUP_CONCAT(DISTINCT 
+        JSON_OBJECT('id', te.id, 'nom', te.nom)
+    ) AS equipements,
+
+    -- Tranches d'âge : id + nom sous forme JSON
+    GROUP_CONCAT(DISTINCT 
+        JSON_OBJECT('id', ta.id, 'nom', ta.nom)
+    ) AS tranches_age,
+
+    -- Commentaires : pseudo + commentaire + note + date
+    GROUP_CONCAT(
+        DISTINCT JSON_OBJECT(
+            'pseudo', u.pseudo,
+            'commentaire', c.commentaire,
+            'note', c.note,
+            'date_ajout', c.date_ajout
+        )
+    ) AS commentaires,
+
+    -- Moyenne des notes
+    ROUND(AVG(c.note), 1) AS note_moyenne,
+
+    -- Nombre total de commentaires
+    COUNT(DISTINCT c.id) AS nombre_commentaires,
+
+    -- Evénements liés (si présents)
+    e.date_debut,
+    e.date_fin
+
+FROM
+    lieux l
+JOIN
+    types_lieux t ON l.id_type = t.id
+LEFT JOIN
+    lieux_equipement le ON l.id = le.id_lieux
+LEFT JOIN
+    types_equipement te ON le.id_equipement = te.id
+LEFT JOIN
+    lieux_age la ON l.id = la.id_lieu
+LEFT JOIN
+    tranche_age ta ON la.id_age = ta.id
+LEFT JOIN
+    commentaires c ON l.id = c.id_lieu
+LEFT JOIN
+    users u ON c.id_user = u.id
+LEFT JOIN
+    evenements e ON l.id = e.id_lieux
+
+WHERE
+    l.id = :id
+
+GROUP BY
+    l.id, e.id";
 
         $query = $this->connexion->prepare($sql);
         $query->bindParam(':id', $id);
@@ -163,40 +202,26 @@ class Lieux
     public function obtenirLieuxAutour($latitude, $longitude)
     {
         $sql = "SELECT 
-            l.id AS id_lieu, 
-            l.nom AS nom_lieu, 
-            l.latitude,
-            l.longitude,
-            l.adresse,
-            l.ville, 
-            l.code_postal,
-            t.nom AS type_lieu, 
-            CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS est_evenement, 
-            GROUP_CONCAT(DISTINCT te.nom SEPARATOR ', ') AS equipements, 
-            e.date_debut, 
+            v.*,
+            CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS est_evenement,
+            e.date_debut,
             e.date_fin,
             (
                 6371 * acos(
                     cos(radians(:latitude)) * 
-                    cos(radians(l.latitude)) * 
-                    cos(radians(l.longitude) - radians(:longitude)) + 
+                    cos(radians(v.latitude)) * 
+                    cos(radians(v.longitude) - radians(:longitude)) + 
                     sin(radians(:latitude)) * 
-                    sin(radians(l.latitude))
+                    sin(radians(v.latitude))
                 )
             ) AS distance
         FROM 
-            lieux l 
-        JOIN 
-            types_lieux t ON l.id_type = t.id 
-        LEFT JOIN 
-            lieux_equipement le ON l.id = le.id_lieux 
-        LEFT JOIN 
-            types_equipement te ON le.id_equipement = te.id 
-        LEFT JOIN 
-            evenements e ON l.id = e.id_lieux 
-        GROUP BY 
-            l.id, e.id 
-        ORDER BY 
+            vue_lieux_complete v
+        LEFT JOIN
+            evenements e ON v.id_lieu = e.id_lieux
+        GROUP BY
+            v.id_lieu, e.id
+        ORDER BY
             distance ASC";
 
         $query = $this->connexion->prepare($sql);
