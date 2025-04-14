@@ -118,8 +118,8 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 ┃           ┗ delete.md         # Documentation suppression commentaire
 ┣ 📂 commentaires/
 ┃   ┣ create.php                # Endpoint pour ajouter
-┃   ┣ read.php                  # Endpoint pour lire un
-┃   ┣ readAll.php               # Endpoint pour tous lire
+┃   ┣ read.php                  # Endpoint pour lire un commentaire
+┃   ┣ readAll.php               # Endpoint pour lire tous les commentaire sur un lieu
 ┃   ┣ update.php                # Endpoint pour la modification
 ┃   ┗ delete.php                # Endpoint pour la suppression
 ┣ 📂 errors/
@@ -163,11 +163,11 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 
 | Endpoint | Méthode | Description | Authentification | Documentation |
 |----------|---------|-------------|------------------|---------------|
-| `/commentaires` | POST | Ajoute un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/create.md) |
-| `/commentaires/{id}` | GET | Détails d'un commentaire | Non | [Documentation](documentation/endPoints/commentaires/read.md) |
+| `/commentaires/ajouter` | POST | Ajoute un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/create.md) |
+| `/commentaires/lire/{id}` | GET | Détails d'un commentaire | Non | [Documentation](documentation/endPoints/commentaires/read.md) |
 | `/commentaires/lieu/{lieu_id}` | GET | Liste les commentaires d'un lieu | Non | [Documentation](documentation/endPoints/commentaires/readAll.md) |
-| `/commentaires/{id}` | PUT | Modifie un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/update.md) |
-| `/commentaires/{id}` | DELETE | Supprime un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/delete.md) |
+| `/commentaires/modifier` | PUT | Modifie un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/update.md) |
+| `/commentaires/supprimer` | DELETE | Supprime un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/delete.md) |
 
 ## 🔐 Authentification
 

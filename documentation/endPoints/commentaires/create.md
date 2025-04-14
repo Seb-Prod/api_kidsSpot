@@ -1,13 +1,13 @@
 # 📌 Documentation de l’API — Ajout d’un commentaire et d’une note
 
-## Endpoint: POST `/commentaires/ajout`
+## Endpoint: POST `/commentaires/ajouter`
 
 Cet endpoint permet à un utilisateur connecté d’ajouter un commentaire et une note sur un lieu.
 
 ### 🧭 URL
 
 ```
-POST /kidsspot/commentaires/ajout
+POST /kidsspot/commentaires/ajouter
 ```
 
 ### 🔐 Authentification requise
@@ -81,7 +81,7 @@ La requête doit contenir un objet JSON avec les informations suivantes :
 
 ```json
 {
-  "Vous avez déjà commenté ce lieu."
+  "message": "Vous avez déjà commenté ce lieu."
 }
 ```
 
@@ -102,16 +102,14 @@ La requête doit contenir un objet JSON avec les informations suivantes :
 ```
 
 #### 🧪 Validation des données
-
-	•	id_lieu : Doit être un entier strictement positif.
-	•	commentaire : Doit être une chaîne non vide.
-	•	note : Doit être un nombre entre 0 et 5.
+- id_lieu : Doit être un entier strictement positif.
+- commentaire : Doit être une chaîne non vide.
+- note : Doit être un nombre entre 0 et 5.
 
 #### 📜 Règles métier
-
-	•	L’utilisateur doit être connecté pour utiliser cet endpoint.
-	•	Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
-	•	Les dates sont gérées automatiquement par la base via NOW().
-	•	Tous les retours sont au format JSON encodé UTF-8.
-	•	L’API supporte CORS.
-	•	Seules les requêtes POST sont autorisées.
+- L’utilisateur doit être connecté pour utiliser cet endpoint.
+- Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
+- Les dates sont gérées automatiquement par la base via NOW().
+- Tous les retours sont au format JSON encodé UTF-8.
+- L’API supporte CORS.
+- Seules les requêtes POST sont autorisées.

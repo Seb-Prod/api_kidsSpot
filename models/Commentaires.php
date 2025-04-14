@@ -40,7 +40,7 @@ class Commentaires
     public function create()
     {
         $sql = "INSERT INTO commentaires SET id_lieu=:id_lieu, commentaire=:commentaire, 
-            note=:note, id_user=:id_user, date_ajout=NOW()";
+            note=:note, id_user=:id_user, date_ajout=NOW(), date_modification = NOW()";
 
         $query = $this->connexion->prepare($sql);
 
@@ -66,16 +66,47 @@ class Commentaires
     }
 
 
-    public function read() {}
+    /**
+     * Lire un commentaire en fonction de son ID.
+     */
+    public function read($id)
+    {
+        $sql = "SELECT
+                c.id AS id_commentaire,
+                c.commentaire,
+                c.note,
+                c.date_ajout,
+                c.date_modification,
+                c.id_user,
+                u.pseudo AS pseudo_user,
+                c.id_lieu,
+                l.nom AS nom_lieu
+            FROM 
+                commentaires c
+            JOIN 
+                users u ON c.id_user = u.id
+            JOIN
+            lieux l ON c.id_lieu = l.id
+            WHERE 
+                c.id = :id";
+
+        $query = $this->connexion->prepare($sql);
+        $query->bindParam(':id', $id);
+
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Lire tous les commentaires sur un lieu par son ID
+     */
 
     /**
      * Modifier un commentaire de la base de données en fonction de son ID.
-     *
-     * Prépare et exécute une requête SQL pour modifier un commentaire spécifique en utilisant l'ID stocké dans la propriété `$this->id`.
-     * L'ID est nettoyé et sécurisé avant l'exécution de la requête.
-     *
-     * @return bool Retourne `true` si la suppression a réussi (au moins une ligne a été affectée),
-     * `false` en cas d'échec ou si aucun commentaire avec cet ID n'a été trouvé.
      */
     public function update()
     {
@@ -105,12 +136,6 @@ class Commentaires
 
     /**
      * Supprimer un commentaire de la base de données en fonction de son ID.
-     *
-     * Prépare et exécute une requête SQL de suppression pour retirer un commentaire spécifique en utilisant l'ID stocké dans la propriété `$this->id`.
-     * L'ID est nettoyé et sécurisé avant l'exécution de la requête.
-     *
-     * @return bool Retourne `true` si la suppression a réussi (au moins une ligne a été affectée),
-     * `false` en cas d'échec ou si aucun commentaire avec cet ID n'a été trouvé.
      */
     public function delete()
     {
@@ -134,8 +159,6 @@ class Commentaires
 
     /**
      * Vérification si l'user à déjà mis un commentaire
-     *
-     * @return void
      */
     public function alreadyExists()
     {
@@ -146,10 +169,9 @@ class Commentaires
         $query->execute();
         return $query->fetchColumn() > 0;
     }
+
     /**
      * Vérification si un commentaire existe
-     *
-     * @return void
      */
     public function exists()
     {
@@ -162,9 +184,6 @@ class Commentaires
 
     /**
      * Récupération de l'id de l'user qui à émis le commentaire
-     *
-     * @param integer $id_commentaire
-     * @return integer | null
      */
     public function getUserIdByCommentId($id_commentaire)
     {
@@ -182,11 +201,7 @@ class Commentaires
     }
 
     /**
-     * Undocumented function
-     *
-     * @param integer $id_user_connecte
-     * @param integer $grade_user_connecte
-     * @return boolean
+     * Vérifie si s'est l'auteur du commentaire ou un administrateur
      */
     public function peutSupprimer($id_user_connecte, $grade_user_connecte)
     {

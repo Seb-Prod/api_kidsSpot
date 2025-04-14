@@ -118,20 +118,20 @@ La requête doit contenir un objet JSON avec l’ID du commentaire à supprimer.
 
 #### 🧪 Validation des données
 
-	•	id : Doit être un entier strictement positif.
+- id : Doit être un entier strictement positif.
 
 #### 🔒 Authentification & Règles de sécurité
 
-	•	L’utilisateur doit être connecté via un token d’authentification.
-	•	L’identifiant de l’utilisateur est automatiquement récupéré à partir du token.
-	•	Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
-	•	Les utilisateurs non connectés ne peuvent pas accéder à cet endpoint.
+- L’utilisateur doit être connecté via un token d’authentification.
+- L’identifiant de l’utilisateur est automatiquement récupéré à partir du token.
+- Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
+- Les utilisateurs non connectés ne peuvent pas accéder à cet endpoint.
 
 #### 📜 Règles métier
 
-	•	Seuls les utilisateurs connectés peuvent supprimer un commentaire.
-	•	L’utilisateur doit être l’auteur du commentaire ou avoir un grade 4 (Administrateur).
-	•	Les requêtes non authentifiées reçoivent un code HTTP 401 Unauthorized.
-	•	Les résultats sont renvoyés au format JSON avec encodage UTF-8.
-	•	L’API prend en charge les requêtes CORS.
-	•	Seules les requêtes DELETE sont acceptées sur cet endpoint.
+- Seuls les utilisateurs connectés peuvent supprimer un commentaire.
+- L’utilisateur doit être l’auteur du commentaire ou avoir un grade 4 (Administrateur).
+- Les requêtes non authentifiées reçoivent un code HTTP 401 Unauthorized.
+- Les résultats sont renvoyés au format JSON avec encodage UTF-8.
+- L’API prend en charge les requêtes CORS.
+- Seules les requêtes DELETE sont acceptées sur cet endpoint.

@@ -1,16 +1,16 @@
 RewriteEngine On
 
 # Ajouter un commentaire et une note
-RewriteRule ^ajout$ create.php [L]
+RewriteRule ^ajouter$ create.php [L]
 
 # Supprimer un commentaire et une note
-#RewriteRule ^supprimer$ delete.php [L]
+RewriteRule ^supprimer$ delete.php [L]
 
 #Modifier un commentaire et une note
-#RewriteRule ^modifier$ update.php [L]
+RewriteRule ^modifier$ update.php [L]
 
-# Lire un lieu spécifique par son ID
-#RewriteRule ^([0-9]+)$ read.php?id=$1 [L,QSA]
+# Lire un commentaire spécifique par son ID
+RewriteRule ^lire/([0-9]+)$ read.php?id=$1 [L,QSA]
 
 # Lire tous les lieux autour d'une latitude/longitude (ex: /autour/48.8566/2.3522)
 RewriteRule ^autour/(-?[0-9]{1,3}(?:\.[0-9]+)?)/(-?[0-9]{1,3}(?:\.[0-9]+)?)$ readAll.php?lat=$1&lng=$2 [L,QSA]
