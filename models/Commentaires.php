@@ -265,4 +265,9 @@ class Commentaires
             return false;
         }
     }
+
+    public function isOwnedBy($userId): bool {
+        $auteurId = $this->getUserIdByCommentId($this->id);
+        return $auteurId === $userId;
+    }
 }

@@ -1,5 +1,37 @@
 <?php
 
+function sendSuccessResponse($data, $status = 200) {
+    http_response_code($status);
+    echo json_encode([
+        "status" => "success",
+        "data" => $data
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function sendUpdatedResponse(){
+    http_response_code(200);
+    echo json_encode([
+        "status" => "success",
+        "message" => "La modification a été effectué"
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function sendCreatedResponse($message = "Ressource créée avec succès.") {
+    http_response_code(201);
+    echo json_encode([
+        "status" => "success",
+        "message" => $message
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function sendDeletedResponse(){
+    http_response_code(204);
+    exit;
+}
+
 function sendErrorResponse($message, $status = 400) {
     http_response_code($status);
     echo json_encode([
@@ -19,25 +51,3 @@ function sendValidationErrorResponse($message, $erreurs, $status = 400) {
     exit;
 }
 
-function sendSuccessResponse($data, $status = 200) {
-    http_response_code($status);
-    echo json_encode([
-        "status" => "success",
-        "data" => $data
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-function sendCreatedResponse($message = "Ressource créée avec succès.") {
-    http_response_code(201);
-    echo json_encode([
-        "status" => "success",
-        "message" => $message
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-function sendDeletedResponse(){
-    http_response_code(204);
-    exit;
-}
