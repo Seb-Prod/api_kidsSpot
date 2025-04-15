@@ -76,7 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     "distance_km" => round((float)$row['distance'], 5)
                 ],
                 "equipements" => parseCommaSeparated($equipements),
-                "ages" => parseCommaSeparated($tranches_age)
+                "ages" => parseCommaSeparated($tranches_age),
+                "date_evenement" => [
+                        "debut" => $row['date_debut'],
+                        "fin" => $row['date_fin']
+                    ],
             ];
             // Ajoute le lieu formaté au tableau principal des lieux.
             $tableauLieux[] = $unLieux;

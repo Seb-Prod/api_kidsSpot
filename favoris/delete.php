@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     // --- Inclusion des Fichiers Nécessaires ---
     include_once '../config/Database.php';
     include_once '../models/Favoris.php';
-    include_once '../middleware/Helpers.php';
+    include_once '../middleware/Validator.php';
 
     // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
@@ -38,50 +38,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     $favoris = new Favoris($db);
 
     // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
-    $donnees = json_decode(file_get_contents("php://input"));
+    $donnees = (array) json_decode(file_get_contents("php://input"), true);
 
-    // Validation des Données Reçues
-    $validation_regles = [
-        'id_lieu' => function ($val) {
-            return is_numeric($val) && $val > 0;
-        },
+    // Régles de validation des données
+    $rules = [
+        'id_lieu' => Validator::positiveInt()
     ];
 
-    // Tableau pour stocker les erreurs de validation.
-    $erreurs = [];
-    // Parcours des règles de validation pour chaque champ.
-    foreach ($validation_regles as $champ => $regle) {
-        // Vérifie si le champ existe dans les données reçues et si la règle de validation est respectée.
-        if (!isset($donnees->$champ) || !$regle($donnees->$champ)) {
-            // Si la validation échoue, ajoute le nom du champ au tableau des erreurs.
-            $erreurs[] = $champ;
-        }
+    // Vérification des données
+    $errors = Validator::validate($donnees, $rules);
+
+    // Si des erreurs
+    if (!empty($errors)) {
+        sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
     }
 
-    // Si aucune erreur de validation n'a été détectée.
-    if (empty($erreurs)) {
-        // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
-        foreach (array_keys($validation_regles) as $champ) {
-            $favoris->$champ = $donnees->$champ;
-        }
 
-        // Assignation de l'id de l'user
-        $favoris->id_user = $donnees_utilisateur['id'];
+    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
+    foreach (array_keys($rules) as $champ) {
+        $favoris->$champ = $donnees[$champ];
+    }
 
-        // Vérification si un favoris existe
-        if (!$favoris->alreadyExists()) {
-            sendErrorResponse("Ce favoris n'existe pas.", 404);
-        }
+    // Assignation de l'id de l'user
+    $favoris->id_user = $donnees_utilisateur['id'];
 
-        if ($favoris->delete()) {
-            sendDeletedResponse();
-        } else {
-            sendErrorResponse("La suppression n'a pas été effectuée.", 503);
-        }
+    // Vérification si un favoris existe
+    if (!$favoris->alreadyExists()) {
+        sendErrorResponse("Ce favoris n'existe pas.", 404);
+    }
+
+    if ($favoris->delete()) {
+        sendDeletedResponse();
     } else {
-        sendValidationErrorResponse("Les données fournies sont invalides.", $erreurs, 400);
+        sendErrorResponse("La suppression n'a pas été effectuée.", 503);
     }
-
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }
