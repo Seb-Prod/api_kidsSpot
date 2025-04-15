@@ -105,75 +105,7 @@ class Lieux
      */
     public function obtenirLieu($id)
     {
-        $sql = "SELECT 
-    l.id AS id_lieu,
-    l.nom AS nom_lieu,
-    l.description,
-    l.latitude,
-    l.longitude,
-    l.adresse,
-    l.ville,
-    l.code_postal,
-    l.telephone,
-    l.site_web,
-    l.horaires,
-    t.nom AS type_lieu,
-    CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS est_evenement,
-
-    -- Equipements : id + nom sous forme JSON
-    GROUP_CONCAT(DISTINCT 
-        JSON_OBJECT('id', te.id, 'nom', te.nom)
-    ) AS equipements,
-
-    -- Tranches d'âge : id + nom sous forme JSON
-    GROUP_CONCAT(DISTINCT 
-        JSON_OBJECT('id', ta.id, 'nom', ta.nom)
-    ) AS tranches_age,
-
-    -- Commentaires : pseudo + commentaire + note + date
-    GROUP_CONCAT(
-        DISTINCT JSON_OBJECT(
-            'pseudo', u.pseudo,
-            'commentaire', c.commentaire,
-            'note', c.note,
-            'date_ajout', c.date_ajout
-        )
-    ) AS commentaires,
-
-    -- Moyenne des notes
-    ROUND(AVG(c.note), 1) AS note_moyenne,
-
-    -- Nombre total de commentaires
-    COUNT(DISTINCT c.id) AS nombre_commentaires,
-
-    -- Evénements liés (si présents)
-    e.date_debut,
-    e.date_fin
-
-FROM
-    lieux l
-JOIN
-    types_lieux t ON l.id_type = t.id
-LEFT JOIN
-    lieux_equipement le ON l.id = le.id_lieux
-LEFT JOIN
-    types_equipement te ON le.id_equipement = te.id
-LEFT JOIN
-    lieux_age la ON l.id = la.id_lieu
-LEFT JOIN
-    tranche_age ta ON la.id_age = ta.id
-LEFT JOIN
-    commentaires c ON l.id = c.id_lieu
-LEFT JOIN
-    users u ON c.id_user = u.id
-LEFT JOIN
-    evenements e ON l.id = e.id_lieux
-
-WHERE
-    l.id = :id
-
-GROUP BY
-    l.id, e.id";
+        $sql = "SELECT * FROM vue_detail_lieu WHERE id_lieu = :id";
 
         $query = $this->connexion->prepare($sql);
         $query->bindParam(':id', $id);

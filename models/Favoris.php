@@ -52,12 +52,62 @@ class Favoris
         return false;
     }
 
-    public function read($id) {}
+    public function read($latitude, $longitude)
+    {
+        // Utilisez des paramètres nommés dans la requête
+        $sql = "SELECT 
+                v.*,
+                CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END AS est_evenement,
+                e.date_debut,
+                e.date_fin,
+                (
+                    6371 * acos(
+                        cos(radians(:latitude)) * 
+                        cos(radians(v.latitude)) * 
+                        cos(radians(v.longitude) - radians(:longitude)) + 
+                        sin(radians(:latitude)) * 
+                        sin(radians(v.latitude))
+                    )
+                ) AS distance
+            FROM 
+                favoris f
+            JOIN 
+                vue_lieux_complete v ON f.id_lieu = v.id_lieu
+            LEFT JOIN 
+                evenements e ON v.id_lieu = e.id_lieux
+            WHERE 
+                f.id_user = :id_user
+            GROUP BY 
+                v.id_lieu, e.id
+            ORDER BY 
+                distance ASC";
+        
+        $query = $this->connexion->prepare($sql);
+        
+        // Nettoyez et liez les paramètres
+        $this->id_user = htmlspecialchars(strip_tags($this->id_user));
+        $query->bindParam(":id_user", $this->id_user);
+        
+        // Ajoutez les paramètres pour latitude et longitude
+        // Si ces valeurs sont des propriétés de la classe, utilisez $this->latitude et $this->longitude
+        $query->bindParam(':latitude', $latitude);
+        $query->bindParam(':longitude', $longitude);
+        
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            // Pour le débogage, vous pourriez vouloir afficher l'erreur
+            // echo "Erreur : " . $e->getMessage();
+            return false;
+        }
+    }
 
     /**
      * Supprimer un favoris
      */
-    public function delete() {
+    public function delete()
+    {
         $sql = "DELETE FROM favoris WHERE id_lieu=:id_lieu";
 
         $query = $this->connexion->prepare($sql);

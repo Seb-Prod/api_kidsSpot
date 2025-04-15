@@ -21,7 +21,7 @@ $erreur = [
 
 // Fournit un détail supplémentaire sur l'erreur si le paramètre 'reason' avec la valeur 'coords' est présent dans l'URL
 if (isset($_GET['reason']) && $_GET['reason'] === 'coords') {
-    $erreur["details"] = "Les coordonnées fournies ne sont pas valides. Utilisez des nombres (ex : /autour/48.8566/2.3522).";
+    $erreur["details"] = "Les coordonnées fournies ne sont pas valides. Utilisez des nombres (ex : /48.8566/2.3522).";
 }
 
 // Encode le tableau PHP `$erreur` en une chaîne JSON
