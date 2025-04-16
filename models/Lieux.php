@@ -297,6 +297,105 @@ class Lieux
         return false;
     }
 
+    public function update($equipements = [], $tranches_age = [])
+    {
+        try {
+            // Démarrer une transaction pour garantir l'intégrité des données
+            $this->connexion->beginTransaction();
+
+            $sql = "UPDATE lieux SET nom=:nom, description=:description, 
+        horaires=:horaires, adresse=:adresse, ville=:ville, code_postal=:code_postal, 
+        latitude=:latitude, longitude=:longitude, telephone=:telephone, 
+        site_web=:site_web, date_modification=:date_modification, id_type=:id_type 
+        WHERE id=:id";
+
+            $query = $this->connexion->prepare($sql);
+
+            // Nettoyage et sécurisation des données
+            $this->nom = htmlspecialchars(strip_tags($this->nom));
+            $this->description = htmlspecialchars(strip_tags($this->description));
+            $this->horaires = htmlspecialchars(strip_tags($this->horaires));
+            $this->adresse = htmlspecialchars(strip_tags($this->adresse));
+            $this->ville = htmlspecialchars(strip_tags($this->ville));
+            $this->code_postal = htmlspecialchars(strip_tags($this->code_postal));
+            $this->latitude = htmlspecialchars(strip_tags($this->latitude));
+            $this->longitude = htmlspecialchars(strip_tags($this->longitude));
+            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
+            $this->site_web = htmlspecialchars(strip_tags($this->site_web));
+            $this->date_modification = date('Y-m-d');
+            $this->id_type = htmlspecialchars(strip_tags($this->id_type));
+            $id = htmlspecialchars(strip_tags($this->id));
+
+            // Liaison des valeurs
+            $query->bindParam(":nom", $this->nom);
+            $query->bindParam(":description", $this->description);
+            $query->bindParam(":horaires", $this->horaires);
+            $query->bindParam(":adresse", $this->adresse);
+            $query->bindParam(":ville", $this->ville);
+            $query->bindParam(":code_postal", $this->code_postal);
+            $query->bindParam(":latitude", $this->latitude);
+            $query->bindParam(":longitude", $this->longitude);
+            $query->bindParam(":telephone", $this->telephone);
+            $query->bindParam(":site_web", $this->site_web);
+            $query->bindParam(":date_modification", $this->date_modification);
+            $query->bindParam(":id_type", $this->id_type);
+            $query->bindParam(":id", $id);
+
+            // Exécution de la requête de mise à jour du lieu
+            if ($query->execute()) {
+                // Supprimer les anciennes associations d'équipements
+                $sql_delete_equipements = "DELETE FROM lieux_equipement WHERE id_lieux = :id_lieux";
+                $query_delete_equipements = $this->connexion->prepare($sql_delete_equipements);
+                $query_delete_equipements->bindParam(":id_lieux", $id);
+                $query_delete_equipements->execute();
+
+                // Ajouter les nouveaux équipements
+                if (!empty($equipements)) {
+                    foreach ($equipements as $equipement_id) {
+                        $equipement_id = htmlspecialchars(strip_tags($equipement_id));
+
+                        $sql_equipement = "INSERT INTO lieux_equipement (id_lieux, id_equipement) VALUES (:id_lieux, :id_equipement)";
+                        $query_equipement = $this->connexion->prepare($sql_equipement);
+                        $query_equipement->bindParam(":id_lieux", $id);
+                        $query_equipement->bindParam(":id_equipement", $equipement_id);
+                        $query_equipement->execute();
+                    }
+                }
+
+                // Supprimer les anciennes associations de tranches d'âge
+                $sql_delete_ages = "DELETE FROM lieux_age WHERE id_lieu = :id_lieu";
+                $query_delete_ages = $this->connexion->prepare($sql_delete_ages);
+                $query_delete_ages->bindParam(":id_lieu", $id);
+                $query_delete_ages->execute();
+
+                // Ajouter les nouvelles tranches d'âge
+                if (!empty($tranches_age)) {
+                    foreach ($tranches_age as $age_id) {
+                        $age_id = htmlspecialchars(strip_tags($age_id));
+
+                        $sql_age = "INSERT INTO lieux_age (id_lieu, id_age) VALUES (:id_lieu, :id_age)";
+                        $query_age = $this->connexion->prepare($sql_age);
+                        $query_age->bindParam(":id_lieu", $id);
+                        $query_age->bindParam(":id_age", $age_id);
+                        $query_age->execute();
+                    }
+                }
+
+                // Valider la transaction
+                $this->connexion->commit();
+                return true;
+            }
+
+            // En cas d'échec de la mise à jour du lieu
+            $this->connexion->rollBack();
+            return false;
+        } catch (PDOException $e) {
+            // En cas d'erreur, annuler toutes les opérations
+            $this->connexion->rollBack();
+            return false;
+        }
+    }
+
     public function exist()
     {
         $sql = "SELECT COUNT(*) FROM lieux WHERE id = :id";

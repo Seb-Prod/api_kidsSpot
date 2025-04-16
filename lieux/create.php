@@ -5,8 +5,7 @@
  * API Endpoint pour la création d'un nouveau lieu.
  */
 
-// --- Configuration des Headers HTTP ---
-
+// Configuration des Headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
@@ -26,7 +25,7 @@ validateUserAutorisation($donnees_utilisateur, 4);
 
 // Vérification de la Méthode HTTP
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // --- Inclusion des Fichiers Nécessaires ---
+    // Inclusion des Fichiers Nécessaires
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/Validator.php';
