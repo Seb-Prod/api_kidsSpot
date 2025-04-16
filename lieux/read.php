@@ -28,8 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Crée une nouvelle instance de la classe Lieux.
     $lieux = new Lieux($db);
 
-    // --- Vérification de la Présence et de la Validité de l'ID ---
-
     // Vérifie si le paramètre 'id' est présent dans l'URL de la requête GET.
     if (isset($_GET['id'])) {
         // Filtre et valide la valeur du paramètre 'id' pour s'assurer que c'est un entier.
