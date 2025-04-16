@@ -10,74 +10,19 @@
  */
 class Lieux
 {
-    /**
-     * @var PDO $connexion Instance de connexion à la base de données.
-     */
     private $connexion;
-
-    /**
-     * @var int $id Identifiant unique du lieu.
-     */
     public $id;
-
-    /**
-     * @var string $nom Nom du lieu.
-     */
     public $nom;
-
-    /**
-     * @var string $description Description du lieu (peut être null).
-     */
     public $description;
-
-    /**
-     * @var string $adresse Adresse du lieu.
-     */
     public $adresse;
-
-    /**
-     * @var string $ville Ville du lieu.
-     */
     public $ville;
-
-    /**
-     * @var string $code_postal Code postal du lieu.
-     */
     public $code_postal;
-
-    /**
-     * @var float $latitude Latitude du lieu.
-     */
     public $latitude;
-
-    /**
-     * @var float $longitude Longitude du lieu.
-     */
     public $longitude;
-
-    /**
-     * @var string $telephone Numéro de téléphone du lieu (peut être null).
-     */
     public $telephone;
-
-    /**
-     * @var string $site_web Site web du lieu (peut être null).
-     */
     public $site_web;
-
-    /**
-     * @var string $date_creation Date de création du lieu (format Y-m-d).
-     */
     public $date_creation;
-
-    /**
-     * @var string $date_modification Date de dernière modification du lieu (format Y-m-d).
-     */
     public $date_modification;
-
-    /**
-     * @var int $id_type Identifiant du type de lieu, clé étrangère vers la table 'types_lieux'.
-     */
     public $id_type;
 
     /**
@@ -251,5 +196,24 @@ class Lieux
         }
 
         return false;
+    }
+
+    public function exist()
+    {
+        $sql = "SELECT COUNT(*) FROM lieux WHERE id = :id";
+
+        $query = $this->connexion->prepare($sql);
+
+        $this->id = htmlspecialchars(strip_tags($this->id));
+
+        $query->bindParam(":id", $this->id);
+
+        try {
+            $query->execute();
+            $count = $query->fetchColumn();
+            return $count > 0;
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 }

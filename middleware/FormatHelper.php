@@ -33,9 +33,7 @@ class FormatHelper
                 "code_postal" => self::safeJsonDecode($row['code_postal'] ?? ''),
                 "ville" => self::safeJsonDecode($row['ville'] ?? ''),
             ],
-            "type" => is_string($row['type_lieu'] ?? '') && ($row['type_lieu'][0] ?? '') === '{'
-                ? json_decode($row['type_lieu'], true)
-                : ['id' => null, 'nom' => self::safeJsonDecode($row['type_lieu'] ?? '')],
+            "type" => self::decodeJsonArray($row['type_lieu'] ?? ''),
             "est_evenement" => (bool)($row['est_evenement'] ?? false),
             "date_evenement" => [
                 "debut" => $row['date_debut'] ?? null,
@@ -65,9 +63,7 @@ class FormatHelper
                 "telephone" => self::safeJsonDecode($row['telephone'] ?? ''),
                 "site_web" => self::safeJsonDecode($row['site_web'] ?? ''),
             ],
-            "type" => is_string($row['type_lieu'] ?? '') && ($row['type_lieu'][0] ?? '') === '{'
-                ? json_decode($row['type_lieu'], true)
-                : ['id' => null, 'nom' => self::safeJsonDecode($row['type_lieu'] ?? '')],
+            "type" => self::decodeJsonArray($row['type_lieu'] ?? ''),
             "est_evenement" => (bool)($row['est_evenement'] ?? false),
             "date_evenement" => [
                 "debut" => $row['date_debut'] ?? null,
