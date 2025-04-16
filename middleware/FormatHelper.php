@@ -28,6 +28,7 @@ class FormatHelper
             "id" => (int)($row['id_lieu'] ?? 0),
             "nom" => self::safeJsonDecode($row['nom_lieu'] ?? ''),
             "horaires" => self::safeJsonDecode($row['horaires'] ?? ''),
+            "description" => self::safeJsonDecode($row['description'] ?? ''),
             "adresse" => [
                 "adresse" => self::safeJsonDecode($row['adresse'] ?? ''),
                 "code_postal" => self::safeJsonDecode($row['code_postal'] ?? ''),
