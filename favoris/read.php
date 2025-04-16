@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     include_once '../models/Favoris.php';
     include_once '../middleware/CoordinatesValidator.php';
     include_once '../middleware/Helpers.php';
+    include_once '../middleware/FormatHelper.php';
 
     // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
@@ -59,29 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             // Extrait les champs de chaque ligne dans des variables individuelles.
             extract($row);
             // Définit la structure d'un tableau représentant un lieu individuel.
-            $unLieux = [
-                "id" => (int)$id_lieu,
-                "nom" => html_entity_decode($nom_lieu),
-                "horaires" => html_entity_decode($horaires),
-                "adresse" => [
-                    "adresse" => html_entity_decode($adresse),
-                    "code_postal" => $code_postal,
-                    "ville" => html_entity_decode($ville),
-                ],
-                "type" => html_entity_decode($type_lieu),
-                "est_evenement" => (bool)$est_evenement,
-                "position" => [
-                    "latitude" => round((float)$row['latitude'], 5),
-                    "longitude" => round((float)$row['longitude'], 5),
-                    "distance_km" => round((float)$row['distance'], 5)
-                ],
-                "equipements" => parseCommaSeparated($equipements),
-                "ages" => parseCommaSeparated($tranches_age),
-                "date_evenement" => [
-                        "debut" => $row['date_debut'],
-                        "fin" => $row['date_fin']
-                    ],
-            ];
+            $unLieux = FormatHelper::lieuLight($row);
             // Ajoute le lieu formaté au tableau principal des lieux.
             $tableauLieux[] = $unLieux;
         }

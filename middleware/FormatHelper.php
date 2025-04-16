@@ -27,26 +27,59 @@ class FormatHelper
     {
         return [
             "id" => (int)$row['id_lieu'],
-                "nom" => html_entity_decode($row['nom_lieu']),
-                "horaires" => html_entity_decode($row['horaires']),
-                "adresse" => [
-                    "adresse" => html_entity_decode($row['adresse']),
-                    "code_postal" => html_entity_decode($row['code_postal']),
-                    "ville" => html_entity_decode($row['ville']),
-                ],
-                "type" => html_entity_decode($row['type_lieu']),
-                "est_evenement" => (bool)$row['est_evenement'],
-                "date_evenement" => [
-                        "debut" => $row['date_debut'],
-                        "fin" => $row['date_fin']
-                    ],
-                "position" => [
-                    "latitude" => round((float)$row['latitude'], 5),
-                    "longitude" => round((float)$row['longitude'], 5),
-                    "distance_km" => round((float)$row['distance'], 5)
-                ],
-                "equipements" => parseCommaSeparated($row['equipements']),
-                "ages" => parseCommaSeparated($row['tranches_age'])
+            "nom" => html_entity_decode($row['nom_lieu']),
+            "horaires" => html_entity_decode($row['horaires']),
+            "adresse" => [
+                "adresse" => html_entity_decode($row['adresse']),
+                "code_postal" => html_entity_decode($row['code_postal']),
+                "ville" => html_entity_decode($row['ville']),
+            ],
+            "type" => is_string($row['type_lieu']) && $row['type_lieu'][0] === '{' 
+                ? json_decode($row['type_lieu'], true) 
+                : ['id' => null, 'nom' => html_entity_decode($row['type_lieu'])],
+            "est_evenement" => (bool)$row['est_evenement'],
+            "date_evenement" => [
+                "debut" => $row['date_debut'],
+                "fin" => $row['date_fin']
+            ],
+            "position" => [
+                "latitude" => round((float)$row['latitude'], 5),
+                "longitude" => round((float)$row['longitude'], 5),
+                "distance_km" => round((float)$row['distance'], 5)
+            ],
+            "equipements" => self::parseCommaSeparated($row['equipements']),
+            "ages" => self::parseCommaSeparated($row['tranches_age'])
         ];
     }
+
+    private static function parseCommaSeparated($data) {
+        if (empty($data)) {
+            return [];
+        }
+    
+        if ($data[0] === '{') {
+            $items = explode(',', $data);
+            $result = [];
+    
+            foreach ($items as $item) {
+                $jsonObj = json_decode($item, true);
+                if ($jsonObj) {
+                    $result[] = [
+                        'id' => (int)$jsonObj['id'],
+                        'nom' => html_entity_decode($jsonObj['nom'])
+                    ];
+                }
+            }
+    
+            return $result;
+        } else {
+            return array_map(function($item) {
+                return [
+                    'id' => null,
+                    'nom' => html_entity_decode(trim($item))
+                ];
+            }, explode(',', $data));
+        }
+    }
 }
+
