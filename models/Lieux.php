@@ -14,6 +14,7 @@ class Lieux
     public $id;
     public $nom;
     public $description;
+    public $horaires;
     public $adresse;
     public $ville;
     public $code_postal;
@@ -24,6 +25,7 @@ class Lieux
     public $date_creation;
     public $date_modification;
     public $id_type;
+    public $id_user;
 
     /**
      * Constructeur de la classe Lieux.
@@ -166,6 +168,103 @@ class Lieux
         }
 
         return false;
+    }
+
+    /**
+     * Créer un nouveau lieu dans la base de données avec ses équipements et tranches d'âge associés.
+     */
+    public function create($equipements = [], $tranches_age = [])
+    {
+        try {
+            // Démarrer une transaction pour garantir l'intégrité des données
+            $this->connexion->beginTransaction();
+
+            $sql = "INSERT INTO lieux SET nom=:nom, description=:description, 
+            horaires=:horaires, adresse=:adresse, ville=:ville, code_postal=:code_postal, 
+            latitude=:latitude, longitude=:longitude, telephone=:telephone, 
+            site_web=:site_web, date_creation=:date_creation, 
+            date_modification=:date_modification, id_type=:id_type, id_user=:id_user";
+
+            $query = $this->connexion->prepare($sql);
+
+            // Nettoyage et sécurisation des données
+            $this->nom = htmlspecialchars(strip_tags($this->nom));
+            $this->description = htmlspecialchars(strip_tags($this->description));
+            $this->horaires = htmlspecialchars(strip_tags($this->horaires));
+            $this->adresse = htmlspecialchars(strip_tags($this->adresse));
+            $this->ville = htmlspecialchars(strip_tags($this->ville));
+            $this->code_postal = htmlspecialchars(strip_tags($this->code_postal));
+            $this->latitude = htmlspecialchars(strip_tags($this->latitude));
+            $this->longitude = htmlspecialchars(strip_tags($this->longitude));
+            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
+            $this->site_web = htmlspecialchars(strip_tags($this->site_web));
+            $this->date_creation = date('Y-m-d');
+            $this->date_modification = date('Y-m-d');
+            $this->id_type = htmlspecialchars(strip_tags($this->id_type));
+            $this->id_user = htmlspecialchars(strip_tags($this->id_user));
+
+            // Liaison des valeurs
+            $query->bindParam(":nom", $this->nom);
+            $query->bindParam(":description", $this->description);
+            $query->bindParam(":horaires", $this->horaires);
+            $query->bindParam(":adresse", $this->adresse);
+            $query->bindParam(":ville", $this->ville);
+            $query->bindParam(":code_postal", $this->code_postal);
+            $query->bindParam(":latitude", $this->latitude);
+            $query->bindParam(":longitude", $this->longitude);
+            $query->bindParam(":telephone", $this->telephone);
+            $query->bindParam(":site_web", $this->site_web);
+            $query->bindParam(":date_creation", $this->date_creation);
+            $query->bindParam(":date_modification", $this->date_modification);
+            $query->bindParam(":id_type", $this->id_type);
+            $query->bindParam(":id_user", $this->id_user);
+
+            // Exécution de la requête d'insertion du lieu
+            if ($query->execute()) {
+                // Récupérer l'ID du lieu nouvellement créé
+                $lieu_id = $this->connexion->lastInsertId();
+
+                // Ajouter les équipements
+                if (!empty($equipements)) {
+                    foreach ($equipements as $equipement_id) {
+                        $equipement_id = htmlspecialchars(strip_tags($equipement_id));
+
+                        $sql_equipement = "INSERT INTO lieux_equipement (id_lieux, id_equipement) VALUES (:id_lieux, :id_equipement)";
+                        $query_equipement = $this->connexion->prepare($sql_equipement);
+                        $query_equipement->bindParam(":id_lieux", $lieu_id);
+                        $query_equipement->bindParam(":id_equipement", $equipement_id);
+                        $query_equipement->execute();
+                    }
+                }
+
+                // Ajouter les tranches d'âge
+                if (!empty($tranches_age)) {
+                    foreach ($tranches_age as $age_id) {
+                        $age_id = htmlspecialchars(strip_tags($age_id));
+
+                        $sql_age = "INSERT INTO lieux_age (id_lieu, id_age) VALUES (:id_lieu, :id_age)";
+                        $query_age = $this->connexion->prepare($sql_age);
+                        $query_age->bindParam(":id_lieu", $lieu_id);
+                        $query_age->bindParam(":id_age", $age_id);
+                        $query_age->execute();
+                    }
+                }
+
+                // Valider la transaction
+                $this->connexion->commit();
+
+                // Retourner l'ID du lieu créé
+                return $lieu_id;
+            }
+
+            // En cas d'échec de l'insertion du lieu
+            $this->connexion->rollBack();
+            return false;
+        } catch (PDOException $e) {
+            // En cas d'erreur, annuler toutes les opérations
+            $this->connexion->rollBack();
+            return false;
+        }
     }
 
     /**

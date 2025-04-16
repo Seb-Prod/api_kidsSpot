@@ -67,4 +67,113 @@ class Validator
             return is_numeric($val) && $val >= $min && $val <= $max;
         };
     }
+
+    /**
+     * Vérifie si la valeur est une latitude valide (-90 à 90)
+     */
+    public static function latitude(): callable
+    {
+        return function ($val) {
+            return is_numeric($val) && $val >= -90 && $val <= 90;
+        };
+    }
+
+    /**
+     * Vérifie si la valeur est une longitude valide (-180 à 180)
+     */
+    public static function longitude(): callable
+    {
+        return function ($val) {
+            return is_numeric($val) && $val >= -180 && $val <= 180;
+        };
+    }
+
+    /**
+     * Vérifie si la valeur est un code postal français valide
+     */
+    public static function codePostal(): callable
+    {
+        return function ($val) {
+            return !empty($val) && is_string($val) && preg_match('/^[0-9]{5}$/', $val);
+        };
+    }
+
+    /**
+     * Vérifie si la valeur est un numéro de téléphone français valide
+     */
+    public static function telephone(): callable
+    {
+        return function ($val) {
+            return !empty($val) && is_string($val) && preg_match('/^[0-9]{10}$/', $val);
+        };
+    }
+
+    /**
+     * Vérifie si la valeur est une URL valide
+     */
+    public static function url(): callable
+    {
+        return function ($val) {
+            return empty($val) || (is_string($val) && filter_var($val, FILTER_VALIDATE_URL));
+        };
+    }
+
+    /**
+     * Vérifie si la valeur est un tableau non vide
+     */
+    public static function nonEmptyArray(): callable
+    {
+        return function ($val) {
+            return is_array($val) && !empty($val);
+        };
+    }
+
+    /**
+     * Vérifie si la valeur est un tableau (vide ou non)
+     */
+    public static function array(): callable
+    {
+        return function ($val) {
+            return is_array($val);
+        };
+    }
+
+    /**
+     * Vérifie si tous les éléments du tableau sont des entiers positifs
+     */
+    public static function arrayOfPositiveInts(): callable
+    {
+        return function ($val) {
+            if (!is_array($val)) {
+                return false;
+            }
+            
+            foreach ($val as $item) {
+                if (!is_numeric($item) || $item <= 0) {
+                    return false;
+                }
+            }
+            
+            return true;
+        };
+    }
+
+    public static function arrayOfUniqueIntsInRange($min, $max)
+{
+    return function ($values) use ($min, $max) {
+        if (!is_array($values)) return false;
+        $unique = array_unique($values);
+
+        if (count($unique) !== count($values)) return false;
+
+        foreach ($unique as $value) {
+            if (!is_int($value) || $value < $min || $value > $max) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+}
+    
 }
