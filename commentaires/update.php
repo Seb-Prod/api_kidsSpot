@@ -68,10 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     // Assignation de l'id de l'user
     $commentaire->id_user = $donnees_utilisateur['id'];
 
-    // Si l'utilisateur n'est PAS l'auteur → interdiction
-    $auteur_id = $commentaire->getUserIdByCommentId($commentaire->id);
-
-    if ($auteur_id != $donnees_utilisateur['id']) {
+    // Vérifier si l'utilisateur a les droits pour modifier ce commentaire
+    if (!$commentaire->peutModifierOuSupprimer($donnees_utilisateur['id'], $donnees_utilisateur['grade'], 'update')) {
         sendErrorResponse("Vous n'avez pas les droits pour effectuer cette action.", 403);
     }
 

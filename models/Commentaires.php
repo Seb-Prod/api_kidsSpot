@@ -34,30 +34,30 @@ class Commentaires
      */
     public function create()
     {
-        $sql = "INSERT INTO commentaires SET id_lieu=:id_lieu, commentaire=:commentaire, 
-            note=:note, id_user=:id_user, date_ajout=NOW(), date_modification = NOW()";
+        try {
+            $sql = "INSERT INTO commentaires SET id_lieu=:id_lieu, commentaire=:commentaire, 
+                note=:note, id_user=:id_user, date_ajout=NOW(), date_modification = NOW()";
 
-        $query = $this->connexion->prepare($sql);
+            $query = $this->connexion->prepare($sql);
 
-        // Nettoyage et sécurisation des données
-        $this->id_lieu = htmlspecialchars(strip_tags($this->id_lieu));
-        $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
-        $this->note = htmlspecialchars(strip_tags($this->note));
-        $this->id_user = htmlspecialchars(strip_tags($this->id_user));
-        // Pas besoin de nettoyer date_ajout car on utilise NOW()
+            // Nettoyage et sécurisation des données
+            $this->id_lieu = htmlspecialchars(strip_tags($this->id_lieu));
+            $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
+            $this->note = htmlspecialchars(strip_tags($this->note));
+            $this->id_user = htmlspecialchars(strip_tags($this->id_user));
 
-        // Liaison des valeurs
-        $query->bindParam(":id_lieu", $this->id_lieu);
-        $query->bindParam(":commentaire", $this->commentaire);
-        $query->bindParam(":note", $this->note);
-        $query->bindParam(":id_user", $this->id_user);
+            // Liaison des valeurs
+            $query->bindParam(":id_lieu", $this->id_lieu);
+            $query->bindParam(":commentaire", $this->commentaire);
+            $query->bindParam(":note", $this->note);
+            $query->bindParam(":id_user", $this->id_user);
 
-        // Exécution de la requête
-        if ($query->execute()) {
-            return true;
+            // Exécution de la requête
+            return $query->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur PDO dans create() : " . $e->getMessage());
+            return false;
         }
-
-        return false;
     }
 
 
@@ -138,28 +138,29 @@ class Commentaires
      */
     public function update()
     {
-        $sql = "UPDATE commentaires 
-        SET commentaire = :commentaire, note = :note, date_modification = NOW()
-        WHERE id = :id AND id_user = :id_user";
-
-        $query = $this->connexion->prepare($sql);
-
-        // Nettoyage et sécurisation des données
-        $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
-        $this->note = htmlspecialchars(strip_tags($this->note));
-
-        // Liaison des valeurs
-        $query->bindParam(":commentaire", $this->commentaire);
-        $query->bindParam(":note", $this->note);
-        $query->bindParam(":id_user", $this->id_user);
-        $query->bindParam(":id", $this->id);
-
-        // Exécution de la requête
-        if ($query->execute()) {
-            return true;
+        try {
+            $sql = "UPDATE commentaires 
+            SET commentaire = :commentaire, note = :note, date_modification = NOW()
+            WHERE id = :id AND id_user = :id_user";
+    
+            $query = $this->connexion->prepare($sql);
+    
+            // Nettoyage et sécurisation des données
+            $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
+            $this->note = htmlspecialchars(strip_tags($this->note));
+    
+            // Liaison des valeurs
+            $query->bindParam(":commentaire", $this->commentaire);
+            $query->bindParam(":note", $this->note);
+            $query->bindParam(":id_user", $this->id_user);
+            $query->bindParam(":id", $this->id);
+    
+            // Exécution de la requête
+            return $query->execute();
+        } catch (PDOException $e) {
+            error_log("Erreur PDO dans update() : " . $e->getMessage());
+            return false;
         }
-
-        return false;
     }
 
     /**
@@ -167,22 +168,22 @@ class Commentaires
      */
     public function delete()
     {
-        $sql = "DELETE FROM commentaires WHERE id=:id";
-
-        $query = $this->connexion->prepare($sql);
-
-        $this->id = htmlspecialchars(strip_tags($this->id));
-
-        $query->bindParam(":id", $this->id);
-
-        if ($query->execute()) {
+        try {
+            $sql = "DELETE FROM commentaires WHERE id=:id";
+    
+            $query = $this->connexion->prepare($sql);
+    
+            $this->id = htmlspecialchars(strip_tags($this->id));
+            $query->bindParam(":id", $this->id);
+            
+            $query->execute();
             // Vérifie si une ligne a été affectée
-            if ($query->rowCount() > 0) {
-                return true;
-            }
+            return $query->rowCount() > 0;
+            
+        } catch (PDOException $e) {
+            error_log("Erreur PDO dans delete() : " . $e->getMessage());
+            return false;
         }
-
-        return false;
     }
 
     /**
@@ -190,12 +191,17 @@ class Commentaires
      */
     public function alreadyExists()
     {
-        $sql = "SELECT COUNT(*) FROM commentaires WHERE id_lieu = :id_lieu AND id_user = :id_user";
-        $query = $this->connexion->prepare($sql);
-        $query->bindParam(":id_lieu", $this->id_lieu);
-        $query->bindParam(":id_user", $this->id_user);
-        $query->execute();
-        return $query->fetchColumn() > 0;
+        try {
+            $sql = "SELECT COUNT(*) FROM commentaires WHERE id_lieu = :id_lieu AND id_user = :id_user";
+            $query = $this->connexion->prepare($sql);
+            $query->bindParam(":id_lieu", $this->id_lieu);
+            $query->bindParam(":id_user", $this->id_user);
+            $query->execute();
+            return $query->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Erreur PDO dans alreadyExists() : " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -203,11 +209,16 @@ class Commentaires
      */
     public function exists()
     {
-        $sql = "SELECT COUNT(*) FROM commentaires WHERE id = :id";
-        $query = $this->connexion->prepare($sql);
-        $query->bindParam(":id", $this->id);
-        $query->execute();
-        return $query->fetchColumn() > 0;
+        try {
+            $sql = "SELECT COUNT(*) FROM commentaires WHERE id = :id";
+            $query = $this->connexion->prepare($sql);
+            $query->bindParam(":id", $this->id);
+            $query->execute();
+            return $query->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            error_log("Erreur PDO dans exists() : " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -215,33 +226,24 @@ class Commentaires
      */
     public function getUserIdByCommentId($id_commentaire)
     {
-        $sql = "SELECT id_user FROM commentaires WHERE id = :id_commentaire";
-        $query = $this->connexion->prepare($sql);
-        $query->bindParam(":id_commentaire", $id_commentaire);
-        $query->execute();
-
-        if ($query->rowCount() > 0) {
-            $row = $query->fetch(PDO::FETCH_ASSOC);
-            return $row['id_user'];
+        try {
+            $sql = "SELECT id_user FROM commentaires WHERE id = :id_commentaire";
+            $query = $this->connexion->prepare($sql);
+            $query->bindParam(":id_commentaire", $id_commentaire);
+            $query->execute();
+    
+            if ($query->rowCount() > 0) {
+                $row = $query->fetch(PDO::FETCH_ASSOC);
+                return $row['id_user'];
+            }
+    
+            return null; // Aucun commentaire trouvé
+        } catch (PDOException $e) {
+            error_log("Erreur PDO dans getUserIdByCommentId() : " . $e->getMessage());
+            return null;
         }
-
-        return null; // Aucun commentaire trouvé
     }
 
-    /**
-     * Vérifie si s'est l'auteur du commentaire ou un administrateur
-     */
-    public function peutSupprimer($id_user_connecte, $grade_user_connecte)
-    {
-        // Récupérer l'auteur du commentaire
-        $userIdAuteur = $this->getUserIdByCommentId($this->id);
-
-        // Autoriser si : auteur ou admin
-        if ($userIdAuteur === $id_user_connecte || $grade_user_connecte == 4) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Récupère la moyenne des notes pour un lieu spécifique.
@@ -266,8 +268,28 @@ class Commentaires
         }
     }
 
-    public function isOwnedBy($userId): bool {
+    public function isOwnedBy($userId): bool
+    {
         $auteurId = $this->getUserIdByCommentId($this->id);
         return $auteurId === $userId;
+    }
+
+    public function peutModifierOuSupprimer($user_id, $user_grade, $action = 'both')
+    {
+        // Récupérer l'auteur du commentaire
+        $auteur_id = $this->getUserIdByCommentId($this->id);
+
+        // Si l'utilisateur est l'auteur, il peut toujours modifier ou supprimer
+        if ($user_id == $auteur_id) {
+            return true;
+        }
+
+        // Pour la suppression, les administrateurs (grade 4) peuvent également supprimer
+        if ($action == 'delete' && $user_grade >= 4) {
+            return true;
+        }
+
+        // Dans tous les autres cas, refuser l'accès
+        return false;
     }
 }

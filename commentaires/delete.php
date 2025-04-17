@@ -66,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     // Assignation de l'id de l'user
     $commentaire->id_user = $donnees_utilisateur['id'];
 
-    // Si l'utilisateur n'est PAS l'auteur ET que ce n'est PAS un admin (grade 4) → interdiction
-    if (!$commentaire->peutSupprimer($donnees_utilisateur['id'], $donnees_utilisateur['grade'])) {
+    // Vérifier si l'utilisateur a les droits pour supprimer ce commentaire
+    if (!$commentaire->peutModifierOuSupprimer($donnees_utilisateur['id'], $donnees_utilisateur['grade'], 'delete')) {
         sendErrorResponse("Vous n'avez pas les droits pour effectuer cette action.", 403);
     }
 
