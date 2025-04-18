@@ -32,28 +32,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if (isset($_GET['id'])) {
         // Filtre et valide la valeur du paramètre 'id' pour s'assurer que c'est un entier.
         $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
-
-        // Vérifie si la validation a réussi et si l'ID est un nombre entier positif.
-        if ($id !== false && $id > 0) {
-            // Récupération du commentaire par ID
-            $stmt = $lieux->obtenirLieu($id);
-
-            // Vérifie si l'exécution de la requête a réussi et s'il y a au moins un résultat.
-            if ($stmt && $stmt->rowCount() > 0) {
-                // Récupère la première (et unique) ligne de résultat sous forme de tableau associatif.
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                // Initialisation du tableau associatif pour stocker les informations du lieu.
-                $tableauLieu= FormatHelper::lieuDetail($row);
-                // Reponse
-                sendSuccessResponse($tableauLieu, 200);
-            } else {
-                sendErrorResponse("Le lieu n'existe pas.", 404);
-            }
-        } else {
+        if ($id === false || $id <= 0) {
             sendErrorResponse("L'ID fourni n'est pas valide.", 400);
+            exit;
+        }
+        // Récupération du commentaire par ID
+        $stmt = $lieux->getPlaceById($id);
+
+        // Vérifie si l'exécution de la requête a réussi et s'il y a au moins un résultat.
+        if ($stmt && $stmt->rowCount() > 0) {
+            // Récupère la première (et unique) ligne de résultat sous forme de tableau associatif.
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Initialisation du tableau associatif pour stocker les informations du lieu.
+            $tableauLieu = FormatHelper::lieuDetail($row);
+            // Reponse
+            sendSuccessResponse($tableauLieu, 200);
+        } else {
+            sendErrorResponse("Aucun lieu trouvé pour cet ID.", 404);
         }
     } else {
-        sendErrorResponse("L'ID du lieu est manquant dans l'URL.", 400);
+        sendErrorResponse("L'ID du lieu est manquant.", 400);
     }
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);

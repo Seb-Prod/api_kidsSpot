@@ -46,7 +46,7 @@ function sendValidationErrorResponse($message, $erreurs, $status = 400) {
     echo json_encode([
         "status" => "error",
         "message" => $message,
-        "erreurs" => $erreurs
+        "errors" => $erreurs
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

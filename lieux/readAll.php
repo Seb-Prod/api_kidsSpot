@@ -31,11 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     // Récupération et validation des coordonnées
     $coordinates = validateCoordinates();
+    if ($coordinates === false) {
+        sendErrorResponse("Coordonnées invalides.", 400);
+        exit;
+    }
     $latitude = $coordinates['latitude'];
     $longitude = $coordinates['longitude'];
 
     // Appel à la Méthode du Modèle
-    $stmt = $lieux->obtenirLieuxAutour($latitude, $longitude);
+    $stmt = $lieux->getPlacesAround($latitude, $longitude);
 
     // Vérifie si l'exécution de la requête a réussi et s'il y a au moins un résultat.
     if ($stmt && $stmt->rowCount() > 0) {
@@ -46,9 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             extract($row);
             // Définit la structure d'un tableau représentant un lieu individuel.
-            $unLieux = FormatHelper::lieuLight($row);
+            $unLieu = FormatHelper::lieuLight($row);
             // Ajoute le lieu formaté au tableau principal des lieux.
-            $tableauLieux[] = $unLieux;
+            $tableauLieux[] = $unLieu;
         }
         // envoie la réponse
         sendSuccessResponse($tableauLieux);

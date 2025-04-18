@@ -147,33 +147,44 @@ class Validator
             if (!is_array($val)) {
                 return false;
             }
-            
+
             foreach ($val as $item) {
                 if (!is_numeric($item) || $item <= 0) {
                     return false;
                 }
             }
-            
+
             return true;
         };
     }
 
     public static function arrayOfUniqueIntsInRange($min, $max)
-{
-    return function ($values) use ($min, $max) {
-        if (!is_array($values)) return false;
-        $unique = array_unique($values);
+    {
+        return function ($values) use ($min, $max) {
+            if (!is_array($values)) return false;
+            $unique = array_unique($values);
 
-        if (count($unique) !== count($values)) return false;
+            if (count($unique) !== count($values)) return false;
 
-        foreach ($unique as $value) {
-            if (!is_int($value) || $value < $min || $value > $max) {
+            foreach ($unique as $value) {
+                if (!is_int($value) || $value < $min || $value > $max) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+    }
+
+    public static function date($format = 'Y-m-d'): callable
+    {
+        return function ($val) use ($format) {
+            if (empty($val) || !is_string($val)) {
                 return false;
             }
-        }
 
-        return true;
-    };
-}
-    
+            $date = DateTime::createFromFormat($format, $val);
+            return $date && $date->format($format) === $val;
+        };
+    }
 }

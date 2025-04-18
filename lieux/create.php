@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/Validator.php';
+    include_once '../middleware/Helpers.php';
 
     // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
@@ -54,12 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'telephone' => Validator::telephone(),
         'site_web' => Validator::url(),
         'id_type' => Validator::positiveInt(),
+        'tranches_age' => Validator::arrayOfUniqueIntsInRange(1, 3),
+        'equipements' => Validator::arrayOfUniqueIntsInRange(1, 5),
     ];
 
     // Règles pour les relations (peuvent être optionnelles)
     $optionalRules = [
-        'tranches_age' => Validator::arrayOfUniqueIntsInRange(1, 3),
-        'equipements' => Validator::arrayOfUniqueIntsInRange(1, 5),
+        'date_debut' => Validator::date('d/m/Y'),
+        'date_fin' => Validator::date('d/m/Y'),
     ];
 
     // Vérification des données
@@ -70,26 +73,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
     }
 
-    // Préparation des valeurs par défaut pour les relations
-    $equipements = isset($donnees['equipements']) ? $donnees['equipements'] : [];
-    $tranches_age = isset($donnees['tranches_age']) ? $donnees['tranches_age'] : [];
-
-    // Validation des relations si elles sont présentes
-    if (!empty($equipements)) {
-        $equipementErrors = Validator::validate(['equipements' => $equipements], ['equipements' => $optionalRules['equipements']]);
-        if (!empty($equipementErrors)) {
-            sendValidationErrorResponse("Les équipements fournis sont invalides.", $equipementErrors, 400);
+    // Validation des dates si elles sont présentes
+    foreach (['date_debut', 'date_fin'] as $dateKey) {
+        if (isset($donnees[$dateKey])) {
+            $errors = Validator::validate([$dateKey => $donnees[$dateKey]], [$dateKey => $optionalRules[$dateKey]]);
+            if (!empty($errors)) {
+                sendValidationErrorResponse("La {$dateKey} fournie est invalide.", $errors, 400);
+            }
         }
     }
 
-    if (!empty($tranches_age)) {
-        $ageErrors = Validator::validate(['tranches_age' => $tranches_age], ['tranches_age' => $optionalRules['tranches_age']]);
-        if (!empty($ageErrors)) {
-            sendValidationErrorResponse("Les tranches d'âge fournies sont invalides.", $ageErrors, 400);
-        }
+    // Vérification de cohérence pour les dates
+    if ((isset($donnees['date_debut']) && !isset($donnees['date_fin'])) ||
+        (!isset($donnees['date_debut']) && isset($donnees['date_fin']))
+    ) {
+        sendValidationErrorResponse("Si une date est fournie, les dates de début et de fin doivent toutes deux être renseignées.", ['date_debut', 'date_fin'], 400);
     }
 
-    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $commentaite.
+    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
     foreach (array_keys($rules) as $champ) {
         if (isset($donnees[$champ])) {
             $lieux->$champ = $donnees[$champ];
@@ -99,9 +100,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Assignation de l'id de l'user
     $lieux->id_user = $donnees_utilisateur['id'];
 
+    // Assiggnation des équipement et tranche d'age
+    $equipements = isset($donnees['equipements']) ? $donnees['equipements'] : [];
+    $tranches_age = isset($donnees['tranches_age']) ? $donnees['tranches_age'] : [];
 
-    // Tentative de création du commentaire dans la base de données.
-    if ($lieux->create($equipements, $tranches_age)) {
+    // Assignation des dates (uniquement si c'est un évenement)
+    $date_debut = isset($donnees['date_debut']) ? convertirDateFrancaisVersUs($donnees['date_debut']) : null;
+    $date_fin = isset($donnees['date_fin']) ? convertirDateFrancaisVersUs($donnees['date_fin']) : null;
+
+    // Tentative de création du lieux dans la base de données.
+    if ($lieux->create($equipements, $tranches_age, $date_debut, $date_fin)) {
         sendCreatedResponse("L'ajout a été effectué.");
     } else {
         sendErrorResponse("L'ajout n'a pas été effectué.", 503);

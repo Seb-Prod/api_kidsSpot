@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     }
 
     // Tentative de suppression du lieux dans la base de données.
-    if ($lieux->supprimer()) {
+    if ($lieux->delete()) {
         sendDeletedResponse();
     } else {
         sendErrorResponse("La suppression n'a pas été effectuée.", 503);

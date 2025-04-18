@@ -102,6 +102,13 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 
 ```
 📦kidsSpot/
+┣ 📂 commentaires/              # Endpoint commentaires
+┃   ┣ .htaccess
+┃   ┣ create.php
+┃   ┣ read.php
+┃   ┣ readAll.php
+┃   ┣ update.php
+┃   ┗ delete.php
 ┣ 📂 config/
 ┃   ┣ config.php                 # Point d'entrée de configuration
 ┃   ┣ Database.php               # Classe de connexion à la base de données
@@ -116,27 +123,43 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 ┃           ┣ readAll.md        # Documentation lecture tous commentaires
 ┃           ┣ update.md         # Documentation mise à jour commentaire
 ┃           ┗ delete.md         # Documentation suppression commentaire
-┣ 📂 commentaires/
-┃   ┣ create.php                # Endpoint pour ajouter
-┃   ┣ read.php                  # Endpoint pour lire un commentaire
-┃   ┣ readAll.php               # Endpoint pour lire tous les commentaire sur un lieu
-┃   ┣ update.php                # Endpoint pour la modification
-┃   ┗ delete.php                # Endpoint pour la suppression
 ┣ 📂 errors/
 ┃   ┣ 400.php                   # Gestion erreur 400
 ┃   ┗ 404.php                   # Gestion erreur 404
+┣ 📂 favoris/                   # Endpoints favoris
+┃   ┣ .htaccess
+┃   ┣ create.php
+┃   ┣ delete.php
+┃   ┗ read.php
+┣ 📂 lieux/                     # Endpoint lieux
+┃   ┣ .htaccess
+┃   ┣ create.php
+┃   ┣ delete.php
+┃   ┣ read.php
+┃   ┣ readAll.php
+┃   ┗ update.php
 ┣ 📂 middleware/
-┃   ┗ auth_middleware.php       # Middleware d'authentification
+┃   ┣ auth_middleware.php       # Middleware d'authentification
+┃   ┣ CoordinatesValidator.php
+┃   ┣ FormatHelper.php
+┃   ┣ Helpers.php
+┃   ┣ ResponseHelper.php
+┃   ┣ UserAutorisation.php
+┃   ┗ Validator.php
 ┣ 📂 models/
-┃   ┣ Lieux.php                 # Modèle pour les lieux
-┃   ┗ Users.php                 # Modèle pour les utilisateurs
-┣ 📂 lieux/
-┃   ┣ read.php                  # Endpoint pour obtenir un lieu spécifique
-┃   ┣ readAll.php               # Endpoint pour obtenir les lieux par position
-┃   ┣ create.php                # Endpoint pour ajouter un lieu
-┃   ┣ delete.php                # Endpoint pour supprimer un lieu
-┃   ┗ update.php                # Endpoint pour modifier un lieu
-┗ .htaccess                     # Configuration des URL amicales
+┃   ┣ Commentaires.php
+┃   ┣ Favoris.php
+┃   ┣ Lieux.php
+┃   ┗ Users.php
+┣ 📂 sql/
+┃   ┗  kids_spot.sql.php
+┣ 📂 users/                     # Enpoint users
+┃   ┣ create.php
+┃   ┗  login.php
+┣ .gitignore
+┣ index.php 
+┗ README.MD
+
 ```
 
 ## 🌐 Points d'accès API
@@ -150,14 +173,13 @@ Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domain
 
 ### Lieux
 
-| Endpoint | Méthode | Description | Authentification |
-|----------|---------|-------------|------------------|
-| `/lieux` | GET | Liste tous les lieux | Non |
-| `/lieux?lat=X&lng=Y&distance=Z` | GET | Liste les lieux autour d'une position | Non |
-| `/lieux/{id}` | GET | Détails d'un lieu spécifique | Non |
-| `/lieux` | POST | Ajoute un nouveau lieu | Oui |
-| `/lieux/{id}` | PUT | Modifie un lieu existant | Oui |
-| `/lieux/{id}` | DELETE | Supprime un lieu | Oui |
+| Endpoint | Méthode | Description | 🔐 | Doc |
+|----------|---------|-------------|------------------|-----|
+| `/lieux/{id}` | GET | Détails d'un lieu spécifique | Non | [📖](documentation/endPoints/lieux/read.md) |
+| `/lieux/{lat}/{long}` | GET | Liste les lieux autour d'une position | Non | [📖](documentation/endPoints/lieux/readAll.md) |
+| `/lieux` | POST | Ajoute un nouveau lieu | Oui |[📖](documentation/endPoints/lieux/create.md) |
+| `/lieux` | PUT | Modifie un lieu existant | Oui |[📖](documentation/endPoints/lieux/update.md) |
+| `/lieux` | DELETE | Supprime un lieu | Oui |[📖](documentation/endPoints/lieux/delete.md) |
 
 ### Commentaires
 
