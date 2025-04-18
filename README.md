@@ -99,87 +99,58 @@ $env = 'development';
 Si vous devez configurer les CORS pour permettre l'accès depuis d'autres domaines, modifiez le fichier `.htaccess` ou ajoutez les en-têtes appropriés dans vos scripts PHP.
 
 ## 📂 Structure du projet
-
+Le projet est organisé par logique métier, chaque dossier correspond à un module spécifique de l'API.
 ```
 📦kidsSpot/
-┣ 📂 commentaires/              # Endpoint commentaires
-┃   ┣ .htaccess
-┃   ┣ create.php
-┃   ┣ read.php
-┃   ┣ readAll.php
-┃   ┣ update.php
-┃   ┗ delete.php
-┣ 📂 config/
-┃   ┣ config.php                 # Point d'entrée de configuration
-┃   ┣ Database.php               # Classe de connexion à la base de données
-┃   ┣ JWT.php                    # Classe pour gérer les tokens JWT
-┃   ┣ config.development.php     # Configuration environnement de développement
-┃   ┗ config.production.php      # Configuration environnement de production
-┣ 📂 documentation/
-┃   ┗ 📂 endPoints/
-┃       ┗ 📂 commentaires/
-┃           ┣ create.md          # Documentation création commentaire
-┃           ┣ read.md           # Documentation lecture commentaire
-┃           ┣ readAll.md        # Documentation lecture tous commentaires
-┃           ┣ update.md         # Documentation mise à jour commentaire
-┃           ┗ delete.md         # Documentation suppression commentaire
-┣ 📂 errors/
-┃   ┣ 400.php                   # Gestion erreur 400
-┃   ┗ 404.php                   # Gestion erreur 404
-┣ 📂 favoris/                   # Endpoints favoris
-┃   ┣ .htaccess
-┃   ┣ create.php
-┃   ┣ delete.php
-┃   ┗ read.php
-┣ 📂 lieux/                     # Endpoint lieux
-┃   ┣ .htaccess
-┃   ┣ create.php
-┃   ┣ delete.php
-┃   ┣ read.php
-┃   ┣ readAll.php
-┃   ┗ update.php
-┣ 📂 middleware/
-┃   ┣ auth_middleware.php       # Middleware d'authentification
-┃   ┣ CoordinatesValidator.php
-┃   ┣ FormatHelper.php
-┃   ┣ Helpers.php
-┃   ┣ ResponseHelper.php
-┃   ┣ UserAutorisation.php
-┃   ┗ Validator.php
-┣ 📂 models/
-┃   ┣ Commentaires.php
-┃   ┣ Favoris.php
-┃   ┣ Lieux.php
-┃   ┗ Users.php
-┣ 📂 sql/
-┃   ┗  kids_spot.sql.php
-┣ 📂 users/                     # Enpoint users
-┃   ┣ create.php
-┃   ┗  login.php
-┣ .gitignore
-┣ index.php 
-┗ README.MD
+┣ 📂 commentaires/          # Contient les endpoints pour les commentaires.
+┣ 📂 config/                # Contient les fichiers de configuration de l'application et la connexion à la base de données.
+┣ 📂 documentation/         # Documentation technique détaillée par endpoint.
+┣ 📂 errors/                # Contient les pages d'erreurs personnalisées pour certaines situations.
+┣ 📂 favoris/               # Contient les endpoints pour les favoris.
+┣ 📂 lieux/                 # Contient les endpoints pour les lieux.
+┣ 📂 middleware/            # Contient les classes d'aide pour la validation, la sécurité, les autorisations et le formatage des données.
+┣ 📂 models/                # Contient les classes PHP représentant les tables de la base de données.
+┣ 📂 sql/                   # Contient les fichiers SQL nécessaires à la création de la base de données.
+┗ 📂 users/                 # Contient les endpoints pour les users.
 
 ```
 
 ## 🌐 Points d'accès API
 
-### Authentification
+### ℹ️ Information
+#### Grades utilisateurs
+| ID | Valeur |
+|----|--------|
+| 1  | standart |
+| 2  | superUser |
+| 3  | spare |
+| 4  | admin |
 
-| Endpoint | Méthode | Description | Authentification |
-|----------|---------|-------------|------------------|
-| `/auth/login` | POST | Connexion et obtention d'un token JWT | Non |
-| `/auth/register` | POST | Inscription d'un nouvel utilisateur | Non |
+#### Types de lieux
+| ID | Valeur |
+|----|--------|
+| 1  | Restaurant |
+| 2  | Loisir |
+| 3  | Culture |
+
+#### Types d'équipement
+| ID | Valeur |
+|----|--------|
+| 1  | Accès poussette |
+| 2  | Aire de jeux |
+| 3  | Micro-ondes |
+| 4  | Chaise haute |
+| 5  | Table à langer |
 
 ### Lieux
 
 | Endpoint | Méthode | Description | 🔐 | Doc |
 |----------|---------|-------------|------------------|-----|
 | `/lieux/{id}` | GET | Détails d'un lieu spécifique | Non | [📖](documentation/endPoints/lieux/read.md) |
-| `/lieux/{lat}/{long}` | GET | Liste les lieux autour d'une position | Non | [📖](documentation/endPoints/lieux/readAll.md) |
-| `/lieux` | POST | Ajoute un nouveau lieu | Oui |[📖](documentation/endPoints/lieux/create.md) |
-| `/lieux` | PUT | Modifie un lieu existant | Oui |[📖](documentation/endPoints/lieux/update.md) |
-| `/lieux` | DELETE | Supprime un lieu | Oui |[📖](documentation/endPoints/lieux/delete.md) |
+| `/lieux/autour/{lat}/{long}` | GET | Liste les lieux autour d'une position | Non | [📖](documentation/endPoints/lieux/readAll.md) |
+| `/lieux/ajout` | POST | Ajoute un nouveau lieu/événement | Oui |[📖](documentation/endPoints/lieux/create.md) |
+| `/lieux/modifier` | PUT | Modifie un lieu/événement existant | Oui |[📖](documentation/endPoints/lieux/update.md) |
+| `/lieux/supprime` | DELETE | Supprime un lieu/événement | Oui |[📖](documentation/endPoints/lieux/delete.md) |
 
 ### Commentaires
 
