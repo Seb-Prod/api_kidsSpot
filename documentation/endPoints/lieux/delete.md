@@ -1,11 +1,11 @@
 # 📍 Endpoint : Supprimer un lieu
 Permet de supprimer un lieu dans la base de données en envoyant son `id` via une requête HTTP `DELETE`.
 
-## Endpoint: GET `/lieux/`
+## Endpoint: GET `/lieux/supprime`
 
 ### 🌐 URL
 ```
-DELETE /kidsspot/lieux/
+DELETE /kidsspot/lieux/supprime
 ```
 
 ### 🔐 Authentification
@@ -19,7 +19,7 @@ Le rôle de l'utilisateur doit être **≥ 4** (autorisation nécessaire).
 
 ### 💻 Exemple de Requête
 ```http
-DELETE /api/lieux/delete.php
+DELETE /api/lieux/supprime
 Authorization: Bearer VOTRE_JWT_TOKEN
 Content-Type: application/json
 

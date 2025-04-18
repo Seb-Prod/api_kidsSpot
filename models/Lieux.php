@@ -255,8 +255,6 @@ class Lieux
         return false;
     }
 
-
-
     /**
      * Mettre à jour un lieu dans la base de données avec ses équipements et tranches d'âge associés.
      *
@@ -272,13 +270,14 @@ class Lieux
             // Démarrer une transaction pour garantir l'intégrité des données
             $this->connexion->beginTransaction();
 
-            $sql = "UPDATE lieux SET nom=:nom, description=:description,
-            horaires=:horaires, adresse=:adresse, ville=:ville, code_postal=:code_postal,
-            latitude=:latitude, longitude=:longitude, telephone=:telephone,
-            site_web=:site_web, date_modification=:date_modification, id_type=:id_type
-            WHERE id=:id";
+            // Mise à jour des informations du lieu
+            $sql_lieu = "UPDATE lieux SET nom=:nom, description=:description,
+                            horaires=:horaires, adresse=:adresse, ville=:ville, code_postal=:code_postal,
+                            latitude=:latitude, longitude=:longitude, telephone=:telephone,
+                            site_web=:site_web, date_modification=:date_modification, id_type=:id_type
+                            WHERE id=:id";
 
-            $query = $this->connexion->prepare($sql);
+            $query_lieu = $this->connexion->prepare($sql_lieu);
 
             // Nettoyage et sécurisation des données
             $this->nom = htmlspecialchars(strip_tags($this->nom));
@@ -296,67 +295,83 @@ class Lieux
             $id = htmlspecialchars(strip_tags($this->id));
 
             // Liaison des valeurs pour la table lieux
-            $query->bindParam(":nom", $this->nom);
-            $query->bindParam(":description", $this->description);
-            $query->bindParam(":horaires", $this->horaires);
-            $query->bindParam(":adresse", $this->adresse);
-            $query->bindParam(":ville", $this->ville);
-            $query->bindParam(":code_postal", $this->code_postal);
-            $query->bindParam(":latitude", $this->latitude);
-            $query->bindParam(":longitude", $this->longitude);
-            $query->bindParam(":telephone", $this->telephone);
-            $query->bindParam(":site_web", $this->site_web);
-            $query->bindParam(":date_modification", $this->date_modification);
-            $query->bindParam(":id_type", $this->id_type);
-            $query->bindParam(":id", $id);
+            $query_lieu->bindParam(":nom", $this->nom);
+            $query_lieu->bindParam(":description", $this->description);
+            $query_lieu->bindParam(":horaires", $this->horaires);
+            $query_lieu->bindParam(":adresse", $this->adresse);
+            $query_lieu->bindParam(":ville", $this->ville);
+            $query_lieu->bindParam(":code_postal", $this->code_postal);
+            $query_lieu->bindParam(":latitude", $this->latitude);
+            $query_lieu->bindParam(":longitude", $this->longitude);
+            $query_lieu->bindParam(":telephone", $this->telephone);
+            $query_lieu->bindParam(":site_web", $this->site_web);
+            $query_lieu->bindParam(":date_modification", $this->date_modification);
+            $query_lieu->bindParam(":id_type", $this->id_type);
+            $query_lieu->bindParam(":id", $id);
 
             // Exécution de la requête de mise à jour du lieu
-            if ($query->execute()) {
+            if ($query_lieu->execute()) {
+                // --- Gestion des équipements ---
                 // Dissocier tous les équipements existants pour ce lieu
                 $sql_delete_equipements = "DELETE FROM lieux_equipement WHERE id_lieux = :id_lieux";
                 $query_delete_equipements = $this->connexion->prepare($sql_delete_equipements);
                 $query_delete_equipements->bindParam(":id_lieux", $id);
                 $query_delete_equipements->execute();
 
-                // Lier les nouveaux équipements en utilisant la fonction lierElements de create
-                $this->lierElements($id, 'lieux_equipement', 'id_equipement', $equipements);
+                // Lier les nouveaux équipements
+                foreach ($equipements as $id_equipement) {
+                    $id_equipement_SQL = htmlspecialchars(strip_tags($id_equipement));
+                    $sql_insert_equipement = "INSERT INTO lieux_equipement (id_lieux, id_equipement) VALUES (:id_lieu, :id_equipement)";
+                    $query_insert_equipement = $this->connexion->prepare($sql_insert_equipement);
+                    $query_insert_equipement->bindParam(":id_lieu", $id);
+                    $query_insert_equipement->bindParam(":id_equipement", $id_equipement_SQL);
+                    $query_insert_equipement->execute();
+                }
 
+                // --- Gestion des tranches d'âge ---
                 // Dissocier toutes les tranches d'âge existantes pour ce lieu
                 $sql_delete_ages = "DELETE FROM lieux_age WHERE id_lieu = :id_lieu";
                 $query_delete_ages = $this->connexion->prepare($sql_delete_ages);
                 $query_delete_ages->bindParam(":id_lieu", $id);
                 $query_delete_ages->execute();
 
-                // Lier les nouvelles tranches d'âge en utilisant la fonction lierElements de create
-                $this->lierElements($id, 'lieux_age', 'id_age', $tranches_age);
+                // Lier les nouvelles tranches d'âge
+                foreach ($tranches_age as $id_age) {
+                    $id_age_SQL = htmlspecialchars(strip_tags($id_age));
+                    $sql_insert_age = "INSERT INTO lieux_age (id_lieu, id_age) VALUES (:id_lieu, :id_age)";
+                    $query_insert_age = $this->connexion->prepare($sql_insert_age);
+                    $query_insert_age->bindParam(":id_lieu", $id);
+                    $query_insert_age->bindParam(":id_age", $id_age_SQL);
+                    $query_insert_age->execute();
+                }
 
-                // Gérer la date de l'événement
-                $sql_delete_evenement = "DELETE FROM evenements WHERE id_lieux = :id_lieux";
-                $query_delete_evenement = $this->connexion->prepare($sql_delete_evenement);
-                $query_delete_evenement->bindParam(":id_lieux", $id);
-                $query_delete_evenement->execute();
 
-                // Ajouter la date de l'événement si fournie (en utilisant la logique de create)
+                // Ajouter la date de l'événement si fournie
                 if ($date_debut && $date_fin) {
-                    $date_debut = htmlspecialchars(strip_tags($date_debut));
-                    $date_fin = htmlspecialchars(strip_tags($date_fin));
+                    $sql_delete_evenement = "DELETE FROM evenements WHERE id_lieux = :id_lieu";
+                    $query_delete_evenement = $this->connexion->prepare($sql_delete_evenement);
+                    $query_delete_evenement->bindParam(":id_lieu", $id);
+                    $query_delete_evenement->execute();
+
+                    $date_debut_cleaned = htmlspecialchars(strip_tags($date_debut));
+                    $date_fin_cleaned = htmlspecialchars(strip_tags($date_fin));
 
                     $sql_dates = "INSERT INTO evenements (id_lieux, date_debut, date_fin) VALUES (:id_lieu, :date_debut, :date_fin)";
                     $query_dates = $this->connexion->prepare($sql_dates);
                     $query_dates->bindParam(":id_lieu", $id);
-                    $query_dates->bindParam(":date_debut", $date_debut);
-                    $query_dates->bindParam(":date_fin", $date_fin);
+                    $query_dates->bindParam(":date_debut", $date_debut_cleaned);
+                    $query_dates->bindParam(":date_fin", $date_fin_cleaned);
                     $query_dates->execute();
                 }
 
-                // Valider la transaction
+
                 $this->connexion->commit();
                 return true;
+            } else {
+                // En cas d'échec de la mise à jour du lieu principal
+                $this->connexion->rollBack();
+                return false;
             }
-
-            // En cas d'échec de la mise à jour du lieu
-            $this->connexion->rollBack();
-            return false;
         } catch (PDOException $e) {
             // En cas d'erreur, annuler toutes les opérations
             $this->connexion->rollBack();

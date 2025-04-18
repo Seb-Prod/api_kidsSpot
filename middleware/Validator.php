@@ -7,15 +7,28 @@ class Validator
         $errors = [];
         foreach ($rules as $field => $rule) {
             $value = $data[$field] ?? null;
-            if (!$rule($value)) {
-                $errors[] = $field;
+            
+            // Déstructuration de la règle
+            $validationFn = $rule['validator'] ?? $rule;
+            $errorMessage = $rule['message'] ?? "Le champ $field n'est pas valide";
+            
+            if (!$validationFn($value)) {
+                $errors[$field] = $errorMessage;
             }
         }
         return $errors;
     }
 
-    // Règles réutilisables
+    // Fonction utilitaire pour créer une règle avec message personnalisé
+    public static function withMessage(callable $validator, string $message): array
+    {
+        return [
+            'validator' => $validator,
+            'message' => $message
+        ];
+    }
 
+    // Règles réutilisables
     public static function requiredString(): callable
     {
         return function ($val) {

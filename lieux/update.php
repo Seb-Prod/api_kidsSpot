@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/Validator.php';
+    include_once '../middleware/Helpers.php';
 
     // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
@@ -43,26 +44,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     // Régles de validation des données
     $rules = [
         // Champs principaux du lieu
-        'id' => Validator::positiveInt(),
-        'nom' => Validator::requiredStringMax(150),
-        'description' => Validator::requiredStringMax(1000),
-        'horaires' => Validator::requiredStringMax(50),
-        'adresse' => Validator::requiredStringMax(100),
-        'ville' => Validator::requiredStringMax(50),
-        'code_postal' => Validator::codePostal(),
-        'latitude' => Validator::latitude(),
-        'longitude' => Validator::longitude(),
-        'telephone' => Validator::telephone(),
-        'site_web' => Validator::url(),
-        'id_type' => Validator::positiveInt(),
-        'tranches_age' => Validator::arrayOfUniqueIntsInRange(1, 3),
-        'equipements' => Validator::arrayOfUniqueIntsInRange(1, 5),
+        'id' => Validator::withMessage(
+            Validator::positiveInt(),
+            "L'identifiant doit être un entier positif"
+        ),
+        'nom' => Validator::withMessage(
+            Validator::requiredStringMax(150),
+            "Le nom est obligatoire et ne doit pas dépasser 150 caractères"
+        ),
+        'description' => Validator::withMessage(
+            Validator::requiredStringMax(1000),
+            "La description est obligatoire et ne doit pas dépasser 1000 caractères"
+        ),
+        'horaires' => Validator::withMessage(
+            Validator::requiredStringMax(50),
+            "Les horaires sont obligatoires et ne doivent pas dépasser 50 caractères"
+        ),
+        'adresse' => Validator::withMessage(
+            Validator::requiredStringMax(100),
+            "L'adresse est obligatoire et ne doit pas dépasser 100 caractères"
+        ),
+        'ville' => Validator::withMessage(
+            Validator::requiredStringMax(50),
+            "La ville est obligatoire et ne doit pas dépasser 50 caractères"
+        ),
+        'code_postal' => Validator::withMessage(
+            Validator::codePostal(),
+            "Le code postal doit être au format français (5 chiffres)"
+        ),
+        'latitude' => Validator::withMessage(
+            Validator::latitude(),
+            "La latitude doit être comprise entre -90 et 90"
+        ),
+        'longitude' => Validator::withMessage(
+            Validator::longitude(),
+            "La longitude doit être comprise entre -180 et 180"
+        ),
+        'telephone' => Validator::withMessage(
+            Validator::telephone(),
+            "Le numéro de téléphone doit être au format français (10 chiffres)"
+        ),
+        'site_web' => Validator::withMessage(
+            Validator::url(),
+            "Le site web doit être une URL valide"
+        ),
+        'id_type' => Validator::withMessage(
+            Validator::positiveInt(),
+            "Le type doit être un identifiant valide (entier positif)"
+        ),
+        'tranches_age' => Validator::withMessage(
+            Validator::arrayOfUniqueIntsInRange(1, 3),
+            "Les tranches d'âge doivent être des identifiants uniques entre 1 et 3"
+        ),
+        'equipements' => Validator::withMessage(
+            Validator::arrayOfUniqueIntsInRange(1, 5),
+            "Les équipements doivent être des identifiants uniques entre 1 et 5"
+        ),
     ];
-
+    
     // Règles pour les relations (peuvent être optionnelles)
     $optionalRules = [
-        'date_debut' => Validator::date('d/m/Y'),
-        'date_fin' => Validator::date('d/m/Y'),
+        'date_debut' => Validator::withMessage(
+            Validator::date('d/m/Y'),
+            "La date de début doit être au format jj/mm/aaaa"
+        ),
+        'date_fin' => Validator::withMessage(
+            Validator::date('d/m/Y'),
+            "La date de fin doit être au format jj/mm/aaaa"
+        ),
     ];
 
     // Vérification des données
@@ -108,11 +157,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     $date_debut = isset($donnees['date_debut']) ? convertirDateFrancaisVersUs($donnees['date_debut']) : null;
     $date_fin = isset($donnees['date_fin']) ? convertirDateFrancaisVersUs($donnees['date_fin']) : null;
 
+    // Vérification si le lieux existe
+    if (!$lieux->exist()) {
+        sendErrorResponse("Ce lieux n'existe pas.", 404);
+    }
+
     // Tentative de création du commentaire dans la base de données.
     if ($lieux->update($equipements, $tranches_age, $date_debut, $date_fin)) {
         sendUpdatedResponse();
     } else {
-        sendErrorResponse("L'ajout n'a pas été effectué.", 503);
+        sendErrorResponse("La modification n'a pas été effectué.", 503);
     }
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);

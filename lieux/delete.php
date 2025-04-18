@@ -42,7 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
 
     // Régles de validation des données
     $rules = [
-        'id' => Validator::positiveInt()
+        'id' => Validator::withMessage(
+            Validator::positiveInt(),
+            "L'identifiant doit être un entier positif"
+        )
     ];
 
     // Vérification des données
@@ -59,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     }
 
     // Vérification si le lieux existe
-     if (!$lieux->exist()) {
+    if (!$lieux->exist()) {
         sendErrorResponse("Ce lieux n'existe pas.", 404);
     }
 
