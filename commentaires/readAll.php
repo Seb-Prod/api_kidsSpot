@@ -2,7 +2,7 @@
 
 /**
  * @file
- * API Endpoint pour lire tous les commentaires.
+ * API Endpoint pour lire tous les commentaires d'un lieu et da moyenne de notes.
  */
 
 // Configuration des Headers HTTP
@@ -48,9 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             }
 
             // Initialisation du tableau
-            $tableauCommentaire = [];
-            $tableauCommentaire['commentaire'] = [];
-            $tableauCommentaire['moyenne_notes'] = $moyenne;
+            $tableauCommentaire = [
+                'moyenne_notes' => $moyenne,
+                'commentaires' => []
+            ];
 
             // Vérifie si l'exécution de la requête a réussi et s'il y a au moins un résultat.
             if ($stmt && $stmt->rowCount() > 0) {
@@ -58,11 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     extract($row);
                     $unCommentaire = FormatHelper::commentaire($row);
-                    $tableauCommentaire['commentaire'][] = $unCommentaire;
+                    $tableauCommentaire['commentaires'][] = $unCommentaire;
                 }
                 sendSuccessResponse($tableauCommentaire, 200);
             } else {
-                sendErrorResponse("Aucun commentaire sur se lieu.", 404);
+                sendErrorResponse("Aucun commentaire sur ce lieu.", 404);
             }
         } else {
             sendErrorResponse("L'ID fourni n'est pas valide.", 400);

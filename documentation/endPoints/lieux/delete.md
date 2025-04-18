@@ -40,7 +40,7 @@ Content-Type: application/json
 ```json
 {
   "status": "error",
-  "message": "La suppression a été effectuée."
+  "message": "Ce lieux n'existe pas."
 }
 ```
 

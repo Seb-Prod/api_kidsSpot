@@ -1,137 +1,72 @@
-# 📌 Documentation de l’API — Suppression de commentaire et de note
+# 📍 Endpoint : Supprimer un commentaire sur un lieu
+Permet à un utilisateur authentifié de supprimer **son propre** commentaire d’un lieu via une requête HTTP `DELETE`.
 
-## Endpoint: DELETE `/commentaires/supprimer`
+## Endpoint: GET `/commentaires/supprimer`
 
-Cet endpoint permet à un utilisateur authentifié de supprimer un commentaire qu’il a rédigé sur un lieu.
-Seul l’auteur du commentaire ou un administrateur peut effectuer cette action.
-
-### 🧭 URL
-
+### 🌐 URL
 ```
 DELETE /kidsspot/commentaires/supprimer
 ```
 
-### 🔐 Authentification requise
+### 🔐 Authentification
+✅ Requise — **Token JWT dans le Header `Authorization`.**  
+Le rôle de l'utilisateur doit être **≥ 4** (autorisation nécessaire).
 
-Cet endpoint nécessite une authentification via Bearer Token.
+### 💡 Paramètres du Body (JSON)
+| Paramètre | Type | Description | Obligatoire | Contraintes |
+|-----------|------|-------------|-------------|-------------|
+| `id` | `int` | Identifiant du commentaire à supprimer | ✅ Oui | Entier strictement positif |
 
-L’utilisateur doit être connecté et transmettre le token dans l’en-tête HTTP suivant :
+### 💻 Exemple de Requête
+```http
+DELETE /api/commentaires/supprimer
+Authorization: Bearer VOTRE_JWT_TOKEN
+Content-Type: application/json
 
-```
-Authorization: Bearer VOTRE_TOKEN_ICI
-```
-Exemple :
-```
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-```
-👉 Si le token est manquant ou invalide, l’API renverra une réponse :
-```json
 {
-  "message": "Accès non autorisé. Veuillez vous connecter."
-}
-```
-👉 Si le grade de l'user n'est pas suffisant, l’API renverra une réponse :
-```json
-{
-  "message": "Vous n'avez pas les droits suffisants pour effectuer cette action."
+  "id": 12
 }
 ```
 
-### 💾 Corps de la requête
-
-La requête doit contenir un objet JSON avec l’ID du commentaire à supprimer.
-
-| Champ           | Type    | Description                           | Obligatoire | Contrainte |
-|-----------------|---------|---------------------------------------|-------------|-----|
-| `id     `       | Integer | Identifiant du lieu à supprimer | Oui | Doit être un entier > 0 |
-
-### 💡 Exemple de requête
-
+### ✅ Exemple de Réponse - Succès (200 OK)
 ```json
 {
-  {
-    "id" : 5
-}
+  "status": "success",
+  "message": "La suppression a été effectuée."
 }
 ```
 
-### 💡 Réponses possibles
-
-#### ✅ Succès - 200 OK (OK)
-
+### ⚠️ Exemple de Réponse - Lieu inexistant (404 Not Found)
 ```json
 {
-  "message": "La suppression a été effectuée"
+  "status": "error",
+  "message": "Ce commentaire n'existe pas."
 }
 ```
 
-#### ⚠️ Erreur — 400 Bad Request (Données invalides)
-
+### ❌ Exemple de Réponse - Erreur de Validation (400 Bad Request)
 ```json
 {
+  "status": "error",
   "message": "Les données fournies sont invalides.",
-  "erreurs": ["id"]
+  "errors": {
+    "id": "L'identifiant doit être un entier strictement positif."
+  }
 }
 ```
 
-#### ⚠️ Erreur — 403 Forbidden (droit insufisant)
+### ⚠️ Codes d’erreur possibles
+| Code HTTP | Message   | Explication                         |
+|-----------|-----------|-------------------------------------|
+| 200 | Commentaire supprimé | Suppression réussie. |
+| 400 | Mauvaise Requête | Données invalides (par ex. id incorrect). |
+| 401 | Non autotisé. | Token JWT manquant ou invalide. |
+| 403 | Accès refusé | Utilisation authentifié, mais rôle insuffisant. |
+| 404 | Introuvable | Le commentaire n'existe pas en base de données. |
+| 405 | La méthode n'est pas autorisée. | Une Autre méthode HTTP que DELETE a été utilisée. |
+| 503 | Erreur serveur | Echec de l'insertion en base |
 
-```json
-{
-  "message": "Vous n'avez pas les droits pour effectuer cette action."
-}
-```
-
-#### ⚠️ Erreur — 404 Not Found (Commentaire introuvable)
-
-```json
-{
-  "Ce commentaire n'existe pas."
-}
-```
-
-#### ⚠️ Erreur — 401 Unauthorized (Non autorisé)
-
-```json
-{
-  "message": "Accès non autorisé. Veuillez vous connecter."
-}
-```
-
-#### ❌ Erreur — 503 Service Unavailable (Échec de suppression)
-
-```json
-{
-  "message": "La suppression n'a pas été effectuée"
-}
-```
-
-#### ❌ Erreur — 405 Method Not Allowed (Méthode non autorisée)
-
-```json
-{
-  "message": "La méthode n'est pas autorisée"
-}
-```
-
-#### 
-
-#### 🧪 Validation des données
-
-- id : Doit être un entier strictement positif.
-
-#### 🔒 Authentification & Règles de sécurité
-
-- L’utilisateur doit être connecté via un token d’authentification.
-- L’identifiant de l’utilisateur est automatiquement récupéré à partir du token.
-- Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
-- Les utilisateurs non connectés ne peuvent pas accéder à cet endpoint.
-
-#### 📜 Règles métier
-
-- Seuls les utilisateurs connectés peuvent supprimer un commentaire.
-- L’utilisateur doit être l’auteur du commentaire ou avoir un grade 4 (Administrateur).
-- Les requêtes non authentifiées reçoivent un code HTTP 401 Unauthorized.
-- Les résultats sont renvoyés au format JSON avec encodage UTF-8.
-- L’API prend en charge les requêtes CORS.
-- Seules les requêtes DELETE sont acceptées sur cet endpoint.
+### 💡 Remarques
+- L’utilisateur peut uniquement supprimer son propre commentaire, sauf s’il possède un rôle supérieur (modérateur ou admin).
+- Validation rigoureuse de l’ID pour éviter les suppressions accidentelles ou malveillantes.
+- Si la ressource n’existe pas ou si elle appartient à un autre utilisateur, la suppression sera refusée.

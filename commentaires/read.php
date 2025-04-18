@@ -2,7 +2,7 @@
 
 /**
  * @file
- * API Endpoint pour lire un commentaire et d'une note par son id.
+ * API Endpoint pour lire un commentaire et sa note par son id.
  */
 
 // Configuration des Headers HTTP

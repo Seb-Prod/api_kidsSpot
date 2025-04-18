@@ -1,99 +1,85 @@
-# 📌 Documentation de l’API — Lecture d’un commentaire et d’une note
+# 📍 Endpoint : Lire un commentaire par ID
+Permet de récupérer les détails d'un commentaire et sa note via son `ID`.
 
-## Endpoint: POST `/commentaires/lire`
+## Endpoint: GET `/commentaires/`
 
-Cet endpoint permet de récupérer un commentaire et sa note en fonction de son identifiant unique.
-
-### 🧭 URL
-
+### 🌐 URL
 ```
-POST /kidsspot/commentaires/lire/{id}
+GET /kidsspot/commentaires/{id}
 ```
 
-### 🔐 Authentification requise
+### 🔐 Authentification
+Non requise.
 
-Aucune authentification requise.
-Cet endpoint est public.
-
-### 💡 Paramètres URL
-
-La requête doit contenir un objet JSON avec les informations suivantes :
-
-| Paramètre           | Type    | Description                           | Obligatoire | Contrainte |
-|-----------------|---------|---------------------------------------|-------------|-----|
-| `id`       | Integer | Identifiant unique du commentaire à  consulter. | Oui | Doit être un entier > 0 |
+### 🧾 Paramètres URL
+| Paramètre | Type   | Description                          | Obligatoire | Contraintes                  |
+|-----------|--------|--------------------------------------|-------------|------------------------------|
+| id        | int    | Identifiant unique du commentaire à lire | ✅ Oui      | Entier strictement positif (> 0) |
 
 ### 💡 Exemple de requête
-
+```http
+GET /kidsspot/commentaires/4
 ```
-GET /kidsspot/commentaires/lire/4
-```
+### ✅ Exemple de réponse (succès)
 
-### 💾 Réponse en cas de succès — 200 OK
 
 ```json
 {
-  "commentaire": {
-    "id": 4,
-    "commentaire": "Très bon accueil, espace super adapté aux enfants !",
-    "note": 5,
-    "date": {
-      "ajout": "2025-04-13 14:25:32",
-      "modification": "2025-04-13 14:35:02"
-    },
-    "user": {
-      "id": 12,
-      "pseudo": "MamanCool"
-    },
-    "lieu": {
-      "id": 3,
-      "nom": "Ludothèque Paris Centre"
+    "status": "success",
+    "data": {
+        "id": 5,
+        "commentaire": "Super endroit pour les enfants, très sécurisé.",
+        "note": 5,
+        "date": {
+            "ajout": "2025-04-14",
+            "modification": "2025-04-14"
+        },
+        "user": {
+            "id": 5,
+            "pseudo": "Seb-Prod2"
+        },
+        "lieu": {
+            "id": 1,
+            "nom": "Jardin des Plantes"
+        }
     }
-  }
-}
+}     
 ```
 
-### ❌ Réponses d’erreur possibles
-
-#### ❌ Erreur — 400 Bad Request (Paramètre manquant ou invalide)
-- Si l’id est manquant dans l’URL :
+### ⚠️ Exemple de Réponse - Commentaire inexistant (404 Not Found)
 ```json
 {
-  "message": "L'ID du commentaire est manquant dans l'URL.",
+    "status": "error",
+    "message": "Le commentaire n'existe pas."
 }
 ```
-- Si l’id n’est pas valide (non numérique ou inférieur ou égal à 0) :
+
+### ❌ Exemple de Réponse - ID manquant (400 Bad Request)
 ```json
 {
-  "message": "L'ID fourni n'est pas valide.",
+    "status": "error",
+    "message": "L'ID du commentaire est manquant dans l'URL."
 }
 ```
 
-#### ❌ Erreur — 404 Not Found (Commentaire introuvable)
-
+### ⛔ Exemple de Réponse - ID invalide (400 Bad Request)
 ```json
 {
-  "message": "Le commentaire n'existe pas."
+    "status": "error",
+    "message": "L'ID fourni n'est pas valide."
 }
 ```
 
+### ⚠️ Codes d’erreur possibles
+| Code HTTP | Message   | Explication                         |
+|-----------|-----------|-------------------------------------|
+| 200       | OK        | Lieu trouvé et renvoyé correctement. |
+| 400       | L'ID du lieu est manquant. | Le paramètre id est absent dans l'URL. |
+| 400       | L'ID fournis n'est pas valide. | id est vide, nom numérique ou inférieur/égal à 0. |
+| 404 | Aucun commentaire trouvé pur cet ID. | Commentaire inexistant avec cet identifiant dans la base. |
+| 405 | La méthode n'est pas autorisée. | Une Autre méthode HTTP que GET a été utilisée. |
 
-
-#### ❌ Erreur — 405 Method Not Allowed (Mauvaise méthode HTTP)
-
-```json
-{
-  "message": "La méthode n'est pas autorisée"
-}
-```
-
-#### 🧪 Validation des données
-
-- id : Doit être un entier strictement supérieur à 0.
-
-#### 📜 Règles métier
-- Le paramètre id est obligatoire pour cette requête.
-- L’API retourne toujours un objet JSON structuré.
-- Les dates sont retournées au format YYYY-MM-DD HH:MM:SS.
-- L’API supporte CORS.
-- Seules les requêtes GET sont autorisées.
+### 💡 Remarques
+- L’identifiant id est requis et doit être un entier positif.
+- Ce endpoint est accessible sans authentification (lecture publique) — sauf si tu souhaites le restreindre.
+- Réponse standardisée avec success, data ou message.

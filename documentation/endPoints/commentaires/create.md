@@ -1,115 +1,76 @@
-# 📌 Documentation de l’API — Ajout d’un commentaire et d’une note
+# 📍 Endpoint : Ajouter un commentaire sur un lieu
+Permet à un utilisateur authentifié d’ajouter un commentaire et une note à un lieu donné via une requête HTTP `POST`.
 
-## Endpoint: POST `/commentaires/ajouter`
+## Endpoint: GET `/commentaires/ajouter`
 
-Cet endpoint permet à un utilisateur connecté d’ajouter un commentaire et une note sur un lieu.
-
-### 🧭 URL
-
+### 🌐 URL
 ```
 POST /kidsspot/commentaires/ajouter
 ```
 
-### 🔐 Authentification requise
+### 🔐 Authentification
+✅ Requise — **Token JWT dans le Header `Authorization`.**  
+Le rôle de l'utilisateur doit être **≥ 1** (autorisation nécessaire).
 
-Cet endpoint nécessite une authentification via Bearer Token.
+### 💡 Paramètres du Body (JSON)
+| Paramètre      | Type      | Description                                | Obligatoire | Contraintes                       |
+|----------------|-----------|--------------------------------------------|-------------|-----------------------------------|
+| `id_lieu`      | `int`     | Identifiant du lieu commenté               | ✅ Oui      | Entier strictement positif        |
+| `note`         | `int`   | Note attribuée au lieu                     | ✅ Oui      | Comprise entre `0` et `5`         |
+| `commentaire`  | `string`  | Texte du commentaire                       | ✅ Oui      | Chaîne non vide, max `1000` chars |
 
-L’utilisateur doit être connecté et transmettre le token dans l’en-tête HTTP suivant :
+### 💻 Exemple de Requête
+```http
+POST /api/commentaires/create.php
+Authorization: Bearer VOTRE_JWT_TOKEN
+Content-Type: application/json
 
-```
-Authorization: Bearer VOTRE_TOKEN_ICI
-```
-Exemple :
-```
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-```
-👉 Si le token est manquant ou invalide, l’API renverra une réponse :
-```json
 {
-  "message": "Accès non autorisé. Veuillez vous connecter."
-}
-```
-👉 Si le grade de l'user n'est pas suffisant, l’API renverra une réponse :
-```json
-{
-  "message": "Vous n'avez pas les droits suffisants pour effectuer cette action."
-}
-```
-
-### 💾 Corps de la requête
-
-La requête doit contenir un objet JSON avec les informations suivantes :
-
-| Champ           | Type    | Description                           | Obligatoire | Contrainte |
-|-----------------|---------|---------------------------------------|-------------|-----|
-| `id_lieu`       | Integer | Identifiant du lieu concerné| Oui | Doit être un entier > 0 |
-| `commentaire`   | String  | Texte du commentaire utilisateur  | Oui         | Non vide |
-| `note`          | Integer | Note attribuée au lieu            | Oui  | Valeur entre 0 et 5 |
-
-### 💡 Exemple de requête
-
-```json
-{
-  {
-    "id_lieu" : 1,
-    "commentaire" : "Super bien",
-    "note" : 1
-}
+  "id_lieu": 7,
+  "note": 4.5,
+  "commentaire": "Super endroit pour les enfants, sécurisé et personnel très accueillant."
 }
 ```
 
-### 💡 Réponses possibles
-
-#### ✅ Succès - 201 Created
-
+### ✅ Exemple de Réponse - Succès (201 Created)
 ```json
 {
-  "message": "L'ajout a été effectué"
+  "status": "success",
+  "message": "L'ajout a été effectué."
 }
 ```
 
-#### ⚠️ Erreur — 400 Bad Request (Données invalides)
-
+### ⚠️ Exemple de Réponse - Déjà commenté (409 Conflict)
 ```json
 {
-  "message": "Les données fournies sont invalides.",
-  "erreurs": ["commentaire", "note"]
-}
-```
-
-#### ⚠️ Erreur — 409 Conflict (Doublon)
-
-```json
-{
+  "status": "error",
   "message": "Vous avez déjà commenté ce lieu."
 }
 ```
 
-#### ⚠️ Erreur — 503 Service Unavailable (Échec technique)
-
+### ❌ Exemple de Réponse - Erreur de Validation (400 Bad Request)
 ```json
 {
-  "message": "L'ajout n'a pas été effectué"
+  "status": "error",
+  "message": "Les données fournies sont invalides.",
+  "errors": {
+    "note": "Une note est obligatoire entre 0 et 5"
+  }
 }
 ```
 
-#### ❌ Erreur — 405 Method Not Allowed (Mauvaise méthode HTTP)
+### ⚠️ Codes d’erreur possibles
+| Code HTTP | Message   | Explication                         |
+|-----------|-----------|-------------------------------------|
+| 201       | Commentaire ajouté | Le commentaire a été créé avec succès. |
+| 400       | Données invalides | Paramètres manquants ou invalides. |
+| 401       | Non autotisé. | Token JWT manquant ou invalide. |
+| 403 | Accès refusé | Utilisation authentifié, mais rôle insuffisant. |
+| 405 | La méthode n'est pas autorisée. | Une Autre méthode HTTP que POST a été utilisée. |
+| 409 | Commentaire déjà existant | L'utilisateur a déjà commenté ce lieu |
+| 503 | Erreur serveur | Echec de l'insertion en base |
 
-```json
-{
-  "message": "La méthode n'est pas autorisée"
-}
-```
-
-#### 🧪 Validation des données
-- id_lieu : Doit être un entier strictement positif.
-- commentaire : Doit être une chaîne non vide.
-- note : Doit être un nombre entre 0 et 5.
-
-#### 📜 Règles métier
-- L’utilisateur doit être connecté pour utiliser cet endpoint.
-- Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
-- Les dates sont gérées automatiquement par la base via NOW().
-- Tous les retours sont au format JSON encodé UTF-8.
-- L’API supporte CORS.
-- Seules les requêtes POST sont autorisées.
+### 💡 Remarques
+- Un utilisateur ne peut commenter un même lieu qu’une seule fois.
+- La note doit être comprise entre 0 et 5, demi-points autorisés.
+- Le commentaire est stocké immédiatement après validation et contrôle d’unicité.

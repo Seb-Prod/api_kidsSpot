@@ -1,28 +1,45 @@
 <?php
-
-/**
- * @file
- * Modèle de la classe Commentaires.
- *
- * Cette classe fournit des méthodes pour interagir avec la table 'commentaires' de la base de données, incluant la récupération des commentaires et de la moyenne des notes pour un lieu (par son id), l'ajout d'un commentaire et de sa note, la suppression d'un commentaire et la modification.
- */
-
 class Commentaires
 {
+    /**
+     * @var PDO Instance de la connexion à la base de données.
+     */
     private $connexion;
+
+    /**
+     * @var int Identifiant unique du commentaire.
+     */
     public $id;
+
+    /**
+     * @var int Identifiant du lieu auquel le commentaire est associé.
+     */
     public $id_lieu;
+
+    /**
+     * @var string Contenu du commentaire.
+     */
     public $commentaire;
+
+    /**
+     * @var int Note attribuée dans le commentaire.
+     */
     public $note;
+
+    /**
+     * @var int Identifiant de l'utilisateur ayant créé le commentaire.
+     */
     public $id_user;
+
+    /**
+     * @var string Date et heure de l'ajout du commentaire (format MySQL DATETIME).
+     */
     public $date_ajout;
 
     /**
      * Constructeur de la classe Commentaires.
      *
-     * Initialise l'instance de connexion à la base de données.
-     *
-     * @param PDO $db Instance de connexion PDO.
+     * @param PDO $db Instance de la connexion à la base de données.
      */
     public function __construct($db)
     {
@@ -30,7 +47,9 @@ class Commentaires
     }
 
     /**
-     * Créer un nouveau commentaire et note pour un lieu.
+     * Crée un nouveau commentaire dans la base de données.
+     *
+     * @return bool True en cas de succès de la création, false en cas d'erreur.
      */
     public function create()
     {
@@ -40,19 +59,17 @@ class Commentaires
 
             $query = $this->connexion->prepare($sql);
 
-            // Nettoyage et sécurisation des données
             $this->id_lieu = htmlspecialchars(strip_tags($this->id_lieu));
             $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
             $this->note = htmlspecialchars(strip_tags($this->note));
             $this->id_user = htmlspecialchars(strip_tags($this->id_user));
 
-            // Liaison des valeurs
             $query->bindParam(":id_lieu", $this->id_lieu);
             $query->bindParam(":commentaire", $this->commentaire);
             $query->bindParam(":note", $this->note);
             $query->bindParam(":id_user", $this->id_user);
 
-            // Exécution de la requête
+
             return $query->execute();
         } catch (PDOException $e) {
             error_log("Erreur PDO dans create() : " . $e->getMessage());
@@ -60,9 +77,12 @@ class Commentaires
         }
     }
 
-
     /**
-     * Lire un commentaire en fonction de son ID.
+     * Lit les informations d'un commentaire spécifique à partir de son ID.
+     * Inclut également le pseudo de l'utilisateur et le nom du lieu.
+     *
+     * @param int $id L'identifiant du commentaire à récupérer.
+     * @return PDOStatement|false Le résultat de la requête PDO en cas de succès, false en cas d'erreur.
      */
     public function read($id)
     {
@@ -97,7 +117,11 @@ class Commentaires
     }
 
     /**
-     * Lire tous les commentaires sur un lieu par son ID
+     * Lit tous les commentaires associés à un lieu spécifique, ordonnés par date d'ajout descendante.
+     * Inclut également le pseudo de l'utilisateur et le nom du lieu.
+     *
+     * @param int $id L'identifiant du lieu pour lequel récupérer les commentaires.
+     * @return PDOStatement|false Le résultat de la requête PDO en cas de succès, false en cas d'erreur.
      */
     public function readAll($id)
     {
@@ -134,27 +158,26 @@ class Commentaires
     }
 
     /**
-     * Modifier un commentaire de la base de données en fonction de son ID.
+     * Met à jour un commentaire existant dans la base de données.
+     *
+     * @return bool True en cas de succès de la mise à jour, false en cas d'erreur.
      */
     public function update()
     {
         try {
             $sql = "UPDATE commentaires 
             SET commentaire = :commentaire, note = :note, date_modification = NOW()
-            WHERE id = :id AND id_user = :id_user";
-    
+            WHERE id = :id";
+
             $query = $this->connexion->prepare($sql);
-    
-            // Nettoyage et sécurisation des données
+
             $this->commentaire = htmlspecialchars(strip_tags($this->commentaire));
             $this->note = htmlspecialchars(strip_tags($this->note));
-    
-            // Liaison des valeurs
+
             $query->bindParam(":commentaire", $this->commentaire);
             $query->bindParam(":note", $this->note);
-            $query->bindParam(":id_user", $this->id_user);
             $query->bindParam(":id", $this->id);
-    
+
             // Exécution de la requête
             return $query->execute();
         } catch (PDOException $e) {
@@ -164,22 +187,23 @@ class Commentaires
     }
 
     /**
-     * Supprimer un commentaire de la base de données en fonction de son ID.
+     * Supprime un commentaire de la base de données en fonction de son ID.
+     *
+     * @return bool True si au moins une ligne a été affectée (suppression réussie), false en cas d'erreur.
      */
     public function delete()
     {
         try {
             $sql = "DELETE FROM commentaires WHERE id=:id";
-    
+
             $query = $this->connexion->prepare($sql);
-    
+
             $this->id = htmlspecialchars(strip_tags($this->id));
             $query->bindParam(":id", $this->id);
-            
+
             $query->execute();
-            // Vérifie si une ligne a été affectée
+
             return $query->rowCount() > 0;
-            
         } catch (PDOException $e) {
             error_log("Erreur PDO dans delete() : " . $e->getMessage());
             return false;
@@ -187,7 +211,9 @@ class Commentaires
     }
 
     /**
-     * Vérification si l'user à déjà mis un commentaire
+     * Vérifie si un commentaire existe déjà pour un lieu donné par un utilisateur spécifique.
+     *
+     * @return bool True si un commentaire existe déjà, false sinon.
      */
     public function alreadyExists()
     {
@@ -205,7 +231,9 @@ class Commentaires
     }
 
     /**
-     * Vérification si un commentaire existe
+     * Vérifie si un commentaire existe dans la base de données en fonction de son ID.
+     *
+     * @return bool True si le commentaire existe, false sinon.
      */
     public function exists()
     {
@@ -222,7 +250,10 @@ class Commentaires
     }
 
     /**
-     * Récupération de l'id de l'user qui à émis le commentaire
+     * Récupère l'ID de l'utilisateur qui a créé un commentaire spécifique.
+     *
+     * @param int $id_commentaire L'identifiant du commentaire.
+     * @return int|null L'ID de l'utilisateur si trouvé, null sinon.
      */
     public function getUserIdByCommentId($id_commentaire)
     {
@@ -231,22 +262,24 @@ class Commentaires
             $query = $this->connexion->prepare($sql);
             $query->bindParam(":id_commentaire", $id_commentaire);
             $query->execute();
-    
+
             if ($query->rowCount() > 0) {
                 $row = $query->fetch(PDO::FETCH_ASSOC);
                 return $row['id_user'];
             }
-    
-            return null; // Aucun commentaire trouvé
+
+            return null;
         } catch (PDOException $e) {
             error_log("Erreur PDO dans getUserIdByCommentId() : " . $e->getMessage());
             return null;
         }
     }
 
-
     /**
-     * Récupère la moyenne des notes pour un lieu spécifique.
+     * Récupère la moyenne des notes pour un lieu donné.
+     *
+     * @param int $id_lieu L'identifiant du lieu.
+     * @return PDOStatement|false Le résultat de la requête PDO contenant la moyenne des notes, false en cas d'erreur.
      */
     public function getMoyenneNotes($id_lieu)
     {
@@ -268,28 +301,40 @@ class Commentaires
         }
     }
 
+    /**
+     * Vérifie si le commentaire actuel appartient à un utilisateur donné.
+     *
+     * @param int $userId L'identifiant de l'utilisateur à vérifier.
+     * @return bool True si le commentaire appartient à l'utilisateur, false sinon.
+     */
     public function isOwnedBy($userId): bool
     {
         $auteurId = $this->getUserIdByCommentId($this->id);
         return $auteurId === $userId;
     }
 
+    /**
+     * Détermine si un utilisateur a le droit de modifier ou supprimer le commentaire actuel.
+     * Un utilisateur peut toujours modifier son propre commentaire.
+     * Un utilisateur avec un grade supérieur ou égal à 4 peut supprimer n'importe quel commentaire.
+     *
+     * @param int $user_id L'identifiant de l'utilisateur effectuant l'action.
+     * @param int $user_grade Le grade de l'utilisateur effectuant l'action.
+     * @param string $action L'action à vérifier ('modify', 'delete', ou 'both'). Par défaut 'both'.
+     * @return bool True si l'utilisateur a la permission, false sinon.
+     */
     public function peutModifierOuSupprimer($user_id, $user_grade, $action = 'both')
     {
-        // Récupérer l'auteur du commentaire
         $auteur_id = $this->getUserIdByCommentId($this->id);
 
-        // Si l'utilisateur est l'auteur, il peut toujours modifier ou supprimer
         if ($user_id == $auteur_id) {
             return true;
         }
 
-        // Pour la suppression, les administrateurs (grade 4) peuvent également supprimer
         if ($action == 'delete' && $user_grade >= 4) {
             return true;
         }
 
-        // Dans tous les autres cas, refuser l'accès
         return false;
     }
 }

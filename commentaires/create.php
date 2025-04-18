@@ -42,9 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Régles de validation des données
     $rules = [
-        'id_lieu' => Validator::positiveInt(),
-        'note' => Validator::range(0, 5),
-        'commentaire' => Validator::requiredString(),
+        'id_lieu' => Validator::withMessage(Validator::positiveInt(), "L'id du lieu est obligatoire"),
+        'note' => Validator::withMessage(Validator::range(0, 5),"Une note est obligatoire entre 0 et 5"),
+        'commentaire' => Validator::withMessage(Validator::requiredString(),"Un commentaire est obligatoire et ne doit pas dépasser 1000 caractères"),
     ];
 
     // Vérification des données
@@ -74,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         sendErrorResponse("L'ajout n'a pas été effectué.", 503);
     }
-
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }

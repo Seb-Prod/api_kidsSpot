@@ -1,125 +1,85 @@
-# 📌 Documentation de l’API — Modification un Commentaire et une Note
+# 📍 Endpoint : Modifier un commentaire sur un lieu
+Permet à un utilisateur authentifié de modifier **son propre** commentaire sur un lieu via une requête HTTP `PUT`.
 
-## Endpoint: POST `/commentaires/modifier`
+## Endpoint: PUT `/commentaires/modifier`
 
-Cet endpoint permet à un utilisateur connecté de modifier un commentaire et une note liés à un lieu. Seul l'auteur du commentaire peut le modifier.
-
-### 🧭 URL
-
+### 🌐 URL
 ```
-POST /kidsspot/commentaires/modifier
+PUT /kidsspot/commentaires/modifier
 ```
 
-### 🔐 Authentification requise
+### 🔐 Authentification
+✅ Requise — **Token JWT dans le Header `Authorization`.**  
+Le rôle de l'utilisateur doit être **≥ 1** (autorisation nécessaire).
 
-Cet endpoint nécessite une authentification via Bearer Token.
+### 💡 Paramètres du Body (JSON)
+| Paramètre         | Type             | Description                                                | Obligatoire | Contraintes                                        |
+|-------------------|------------------|------------------------------------------------------------|-------------|---------------------------------------------------|
+| `id`             | `int`         | Identifiant du commentaire à modifier                                                | ✅ Oui      | Entier strictement positif                            |
+| `note`     | `int`         | Note associée                              | ✅ Oui      | Comprise entre 0 et 5                           |
+| `commentaire`        | `string`         | Texte du commentaire                                       | ✅ Oui      | Maximum 1000 caractères                             |
 
-L’utilisateur doit être connecté et transmettre le token dans l’en-tête HTTP suivant :
+### 💻 Exemple de Requête
+```http
+POST /api/lieux/modifier
+Authorization: Bearer VOTRE_JWT_TOKEN
+Content-Type: application/json
 
-```
-Authorization: Bearer VOTRE_TOKEN_ICI
-```
-Exemple :
-```
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-```
-👉 Si le token est manquant ou invalide, l’API renverra une réponse :
-```json
 {
-  "message": "Accès non autorisé. Veuillez vous connecter."
-}
-```
-👉 Si le grade de l'user n'est pas suffisant, l’API renverra une réponse :
-```json
-{
-  "message": "Vous n'avez pas les droits suffisants pour effectuer cette action."
+  "id": 17,
+  "commentaire": "Endroit super sympa pour les enfants !",
+  "note": 3
 }
 ```
 
-### 💾 Corps de la requête
-
-La requête doit contenir un objet JSON avec les informations suivantes :
-
-| Champ           | Type    | Description                           | Obligatoire | Contrainte |
-|-----------------|---------|---------------------------------------|-------------|-----|
-| `id`            | Integer | Identifiant du commentaire à modifier | Oui     | Doit être un entier > 0 |
-| `commentaire`   | String  | Nouveau contenu du commentaire  | Oui         | Non vide |
-| `note`          | Integer | Nouvelle note           | Oui  | Valeur entre 0 et 5 |
-
-### 💡 Exemple de requête
-
+### ✅ Exemple de Réponse - Succès (200 OK)
 ```json
 {
-  {
-    "id_lieu" : 4,
-    "commentaire" : "Lieu agréable, service sympathique.",
-    "note" : 4
-}
+  "status": "success",
+  "message": "La modification a été effectuée."
 }
 ```
 
-### 💡 Réponses possibles
-
-#### ✅ Succès - 200 OK (OK)
-
+### ⚠️ Exemple de Réponse - Commentaire inexistant (404 Not Found)
 ```json
 {
-  "message": "La modification a été effectuée"
+  "status": "error",
+  "message": "Ce commentaire n'existe pas."
 }
 ```
 
-#### ⚠️ Erreur — 400 Bad Request (Données invalides)
-
+### ⛔ Exemple de Réponse - Non autorisé (403 Forbidden)
 ```json
 {
-  "message": "Les données fournies sont invalides.",
-  "erreurs": ["commentaire", "note"]
-}
-```
-
-#### ⚠️ Erreur — 403 Forbidden (droit insufisant)
-
-```json
-{
+  "status": "error",
   "message": "Vous n'avez pas les droits pour effectuer cette action."
 }
 ```
 
-#### ⚠️ Erreur — 404 Not Found (Commentaire introuvable)
-
+### ❌ Exemple de Réponse - Erreur de Validation (400 Bad Request)
 ```json
 {
-  "Ce commentaire n'existe pas."
+  "status": "error",
+  "message": "Les données fournies sont invalides.",
+  "errors": {
+    "id": "L'identifiant doit être un entier positif",
+    "note": "Une note est obligatoire entre 0 et 5"
+  }
 }
 ```
 
-#### ⚠️ Erreur — 503 Service Unavailable (Échec technique)
+### ⚠️ Codes d’erreur possibles
+| Code HTTP | Message   | Explication                         |
+|-----------|-----------|-------------------------------------|
+| 200       | Modification réussie        | Le commentaire a été mis à jour avec succès. |
+| 400       | Mauvaise Requête | Données invalide ou manquantes. |
+| 401       | Non autorisé | Token JWT manquant ou invalide. |
+| 403 | Accès refusé | Rôle insuffisant pour effectuer la modification. |
+| 404 | Commentaire non trouvé | L'id du commentaire est introuvable. |
+| 405 | La méthode n'est pas autorisée. | Une Autre méthode HTTP que PUT a été utilisée. |
+| 503 | Erreur serveur | Echec de la modification en base de données |
 
-```json
-{
-  "message": "L'ajout n'a pas été effectué"
-}
-```
-
-#### ❌ Erreur — 405 Method Not Allowed (Mauvaise méthode HTTP)
-
-```json
-{
-  "message": "La méthode n'est pas autorisée"
-}
-```
-
-#### 🧪 Validation des données
-
-	•	id_lieu : Doit être un entier strictement positif.
-	•	commentaire : Doit être une chaîne non vide.
-	•	note : Doit être un nombre entre 0 et 5.
-
-#### 📜 Règles métier
-
-	•	L’utilisateur doit être connecté pour utiliser cet endpoint.
-	•	Un utilisateur ne peut commenter et noter qu’une seule fois un même lieu.
-	•	Les dates sont gérées automatiquement par la base via NOW().
-	•	Tous les retours sont au format JSON encodé UTF-8.
-	•	L’API supporte CORS.
-	•	Seules les requêtes POST sont autorisées.
+### 💡 Remarques
+- L’utilisateur ne peut modifier que ses propres commentaires.
+- Les données sont validées pour éviter des mises à jour erronées ou malveillantes.
+- Si l’ID de commentaire n’existe pas, ou que l’utilisateur n’en est pas l’auteur, la modification sera bloquée.

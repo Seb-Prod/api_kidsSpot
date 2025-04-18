@@ -1,122 +1,90 @@
-# 📌 Documentation de l’API — Lecture des commentaires et moyenne d’un lieu
+# 📍 Endpoint : Lire tous les commentaires d'un lieu + moyenne des notes
+Ce endpoint retourne la liste complète des commentaires pour un lieu spécifique, ainsi que la moyenne des notes.
 
-## Endpoint: POST `/commentaires/lire/lieu`
+## Endpoint: GET `/commentaires/lieu/{id}`
 
-Cet endpoint permet de récupérer tous les commentaires associés à un lieu ainsi que la moyenne des notes attribuées.
-
-### 🧭 URL
-
+### 🌐 URL
 ```
-POST /kidsspot/commentaires/lire/lieu/{id}
+POST /kidsspot/commentaires/lieu/{id}
 ```
 
-### 🔐 Authentification requise
+### 🔐 Authentification
+Non requise.
 
-Aucune authentification requise.
-Cet endpoint est public.
-
-### 💡 Paramètres URL
-
-La requête doit contenir un objet JSON avec les informations suivantes :
-
-| Paramètre           | Type    | Description                           | Obligatoire | Contrainte |
-|-----------------|---------|---------------------------------------|-------------|-----|
-| `id`       | Integer | Identifiant du lieu pour rÃ©cupÃ©rer les commentaires.
- | Oui | Doit être un entier > 0 |
-
+### 🧾 Paramètres URL
+| Paramètre | Type   | Description                          | Obligatoire | Contraintes                  |
+|-----------|--------|--------------------------------------|-------------|------------------------------|
+| `id`      | `int`    | Identifiant du lieu  | ✅ Oui      | Entier strictement positif (> 0) |
 ### 💡 Exemple de requête
-
+```http
+GET /kidsspot/commentaire/lieu/2
 ```
-GET /kidsspot/commentaires/lire/lieu/4
-```
+### ✅ Exemple de réponse (succès)
 
-### 💾 Réponse en cas de succès — 200 OK
 
 ```json
 {
-  "commentaire": [
-    {
-      "id": 15,
-      "commentaire": "Lieu très agréable pour les enfants.",
-      "note": 4,
-      "date": {
-        "ajout": "2025-04-01 10:12:34",
-        "modification": "2025-04-02 15:45:20"
-      },
-      "user": {
-        "id": 7,
-        "pseudo": "ParentCool"
-      },
-      "lieu": {
-        "id": 4,
-        "nom": "Espace Kids Paris"
-      }
-    },
-    {
-      "id": 16,
-      "commentaire": "Très bon accueil et infrastructures top.",
-      "note": 5,
-      "date": {
-        "ajout": "2025-04-05 09:21:11",
-        "modification": "2025-04-05 10:00:00"
-      },
-      "user": {
-        "id": 12,
-        "pseudo": "Julie92"
-      },
-      "lieu": {
-        "id": 4,
-        "nom": "Espace Kids Paris"
-      }
+    "status": "success",
+    "data": {
+        "moyenne_notes": "4.0000",
+        "commentaires": [
+            {
+                "id": 6,
+                "commentaire": "Musée intéressant mais un peu cher pour une famille nombreuse.",
+                "note": 3,
+                "date": {
+                    "ajout": "2025-04-14",
+                    "modification": "2025-04-14"
+                },
+                "user": {
+                    "id": 6,
+                    "pseudo": "User1"
+                },
+                "lieu": {
+                    "id": 2,
+                    "nom": "Bibliothèque Louise bis"
+                }
+            },
+            {
+                "id": 11,
+                "commentaire": "Expositions originales, mes enfants ont adoré.",
+                "note": 5,
+                "date": {
+                    "ajout": "2025-04-14",
+                    "modification": "2025-04-14"
+                },
+                "user": {
+                    "id": 5,
+                    "pseudo": "Seb-Prod2"
+                },
+                "lieu": {
+                    "id": 2,
+                    "nom": "Bibliothèque Louise bis"
+                }
+            }
+        ]
     }
-  ],
-  "moyenne_notes": 4.5
 }
 ```
 
-### ❌ Réponses d’erreur possibles
-
-#### ❌ Erreur — 400 Bad Request (Paramètre manquant ou invalide)
-- Si l’id est manquant dans l’URL :
+### ⚠️ Exemple de Réponse - Aucun commentaire (404 Not Found)
 ```json
 {
-  "message": "L'ID du lieu est manquant dans l'URL.",
-}
-```
-- Si l’id n’est pas valide (non numérique ou inférieur ou égal à 0) :
-```json
-{
-  "message": "L'ID fourni n'est pas valide.",
-}
-```
-
-#### ❌ Erreur — 404 Not Found (Aucun commentaire pour ce lieu)
-
-```json
-{
-  "message": "Le commentaire n'existe pas."
+    "status": "error",
+    "message": "Aucun commentaire sur ce lieu."
 }
 ```
 
 
+### ⚠️ Codes d’erreur possibles
+| Code HTTP | Message   | Explication                         |
+|-----------|-----------|-------------------------------------|
+| 200       | OK        | Commentaires trouvés et retournés. |
+| 400       | Mauvaise Requête | L'ID fourni n'est pas valide. |
+| 404 | Aucun commentaire trouvé | Aucun commentaire sur ce lieu. |
+| 405 | La méthode n'est pas autorisée. | Une Autre méthode HTTP que GET a été utilisée. |
 
-#### ❌ Erreur — 405 Method Not Allowed (Mauvaise méthode HTTP)
-
-```json
-{
-  "message": "La méthode n'est pas autorisée"
-}
-```
-
-#### 🧪 Validation des données
-
-- id : Doit être un entier strictement supérieur à 0.
-
-#### 📜 Règles métier
-- Le paramètre id est obligatoire.
-- L’API retourne une liste de commentaires liés au lieu ainsi que la moyenne des notes.
-- Si aucun commentaire n’est trouvé pour ce lieu, un message explicite est renvoyé.
-- Les dates sont retournées au format YYYY-MM-DD HH:MM:SS.
-- Tous les retours sont au format JSON encodé UTF-8.
-- L’API supporte CORS.
-- Seules les requêtes GET sont autorisées.
+### 💡 Remarques
+- Le paramètre id est requis et doit être un entier positif.
+- Le tableau commentaires sera vide si aucun commentaire n’est trouvé, et une erreur 404 sera renvoyée.
+- La moyenne_notes est toujours retournée même si aucun commentaire n’est disponible.

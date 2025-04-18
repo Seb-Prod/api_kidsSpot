@@ -42,9 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
 
     // Régles de validation des données
     $rules = [
-        'id' => Validator::positiveInt(),
-        'note' => Validator::range(0, 5),
-        'commentaire' => Validator::requiredString(),
+        'id' => Validator::withMessage(
+            Validator::positiveInt(),
+            "L'identifiant doit être un entier positif"
+        ),
+        'note' => Validator::withMessage(Validator::range(0, 5),"Une note est obligatoire entre 0 et 5"),
+        'commentaire' => Validator::withMessage(Validator::requiredString(),"Un commentaire est obligatoire et ne doit pas dépasser 1000 caractères")
     ];
 
     // Vérification des données

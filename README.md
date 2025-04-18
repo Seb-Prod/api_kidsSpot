@@ -115,9 +115,7 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 
 ```
 
-## 🌐 Points d'accès API
-
-### ℹ️ Information
+## ℹ️ Information
 #### Grades utilisateurs
 | ID | Valeur |
 |----|--------|
@@ -142,6 +140,8 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 | 4  | Chaise haute |
 | 5  | Table à langer |
 
+## 🌐 Points d'accès API
+
 ### Lieux
 
 | Endpoint | Méthode | Description | 🔐 | Doc |
@@ -154,13 +154,13 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 
 ### Commentaires
 
-| Endpoint | Méthode | Description | Authentification | Documentation |
-|----------|---------|-------------|------------------|---------------|
-| `/commentaires/ajouter` | POST | Ajoute un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/create.md) |
-| `/commentaires/lire/{id}` | GET | Détails d'un commentaire | Non | [Documentation](documentation/endPoints/commentaires/read.md) |
-| `/commentaires/lire/lieu/{id}` | GET | Liste les commentaires d'un lieu | Non | [Documentation](documentation/endPoints/commentaires/readAll.md) |
-| `/commentaires/modifier` | PUT | Modifie un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/update.md) |
-| `/commentaires/supprimer` | DELETE | Supprime un commentaire | Oui | [Documentation](documentation/endPoints/commentaires/delete.md) |
+| Endpoint | Méthode | Description | 🔐 | Doc |
+|----------|---------|-------------|----|-----|
+| `/commentaires/{id}` | GET | Détails d'un commentaire | Non | [📖](documentation/endPoints/commentaires/read.md) |
+| `/commentaires/lieu/{id}` | GET | Liste les commentaires d'un lieu | Non | [📖](documentation/endPoints/commentaires/readAll.md) |
+| `/commentaires/ajouter` | POST | Ajoute un commentaire | Oui | [📖](documentation/endPoints/commentaires/create.md) |
+| `/commentaires/modifier` | PUT | Modifie un commentaire | Oui | [📖](documentation/endPoints/commentaires/update.md) |
+| `/commentaires/supprimer` | DELETE | Supprime un commentaire | Oui | [📖](documentation/endPoints/commentaires/delete.md) |
 
 ### Favoris
 

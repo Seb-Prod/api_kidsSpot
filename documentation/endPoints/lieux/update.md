@@ -1,11 +1,11 @@
 # 📍 Endpoint : Modifier un lieu existant
 Permet de modifier les informations d'un lieu déjà existant dans la base de données en envoyant ses informations via une requête HTTP `PUT`.
 
-## Endpoint: PUT `/lieux`
+## Endpoint: PUT `/lieux/modifier`
 
 ### 🌐 URL
 ```
-PUT /kidsspot/lieux
+PUT /kidsspot/lieux/modifier
 ```
 
 ### 🔐 Authentification
@@ -37,11 +37,12 @@ Le rôle de l'utilisateur doit être **≥ 4** (autorisation nécessaire).
 
 ### 💻 Exemple de Requête
 ```http
-POST /api/lieux/create.php
+POST /api/lieux/modifier
 Authorization: Bearer VOTRE_JWT_TOKEN
 Content-Type: application/json
 
 {
+  "id": 53,
   "nom": "Le Parc Enchanté",
   "description": "Un parc sécurisé et agréable pour les enfants de tout âge.",
   "horaires": "10h00 - 19h00",

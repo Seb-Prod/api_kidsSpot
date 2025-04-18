@@ -42,7 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
 
     // Régles de validation des données
     $rules = [
-        'id' => Validator::positiveInt()
+        'id' => Validator::withMessage(
+            Validator::positiveInt(),
+            "L'identifiant doit être un entier positif"
+        )
     ];
 
     // Vérification des données
