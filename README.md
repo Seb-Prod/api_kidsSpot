@@ -144,7 +144,7 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 
 ### Lieux
 
-| Endpoint | Méthode | Description | 🔐 | Doc |
+| Endpoint | Méthode | Description | 🔐 | 📖 |
 |----------|---------|-------------|------------------|-----|
 | `/lieux/{id}` | GET | Détails d'un lieu spécifique | Non | [📖](documentation/endPoints/lieux/read.md) |
 | `/lieux/autour/{lat}/{long}` | GET | Liste les lieux autour d'une position | Non | [📖](documentation/endPoints/lieux/readAll.md) |
@@ -154,7 +154,7 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 
 ### Commentaires
 
-| Endpoint | Méthode | Description | 🔐 | Doc |
+| Endpoint | Méthode | Description | 🔐 | 📖 |
 |----------|---------|-------------|----|-----|
 | `/commentaires/{id}` | GET | Détails d'un commentaire | Non | [📖](documentation/endPoints/commentaires/read.md) |
 | `/commentaires/lieu/{id}` | GET | Liste les commentaires d'un lieu | Non | [📖](documentation/endPoints/commentaires/readAll.md) |
@@ -185,10 +185,19 @@ Le token a une durée de validité limitée et devra être renouvelé périodiqu
 ## 📚 Documentation technique
 
 ### Models
-| Models | Documentation |
+| Models | 📖 |
 |--------|---------------|
-| Commentaires.php | [Documentation](documentation/models/Commentaires.md) |
+| Commentaires.php | [📖](documentation/models/Commentaires.md) |
 
+### Classes
+| Classe | 📖 |
+|--------|----------------|
+| /middleware/Validator.php | [📖](documentation/classes/validator.md) |
+
+### Fonctions
+| Fonctions | 📖 |
+|--------|----------------|
+| /middleware/UserAutorisation.php | [📖](documentation/fonctions/UserAutorisation.md) |
 ### Autres documentation
 
 - [Système d'authentification et base de données](documentation/authentificationEtBdd.md)
