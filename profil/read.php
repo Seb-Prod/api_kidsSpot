@@ -43,11 +43,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Appel à la Méthode du Modèle
     $stmt = $profil->read();
 
-    // Si requêtte OK et contien au moins un éléments.
-    if ($stmt) {
-        var_dump($stmt);
+    if ($stmt && $stmt->rowCount() > 0) {
+        // Récupération des données utilisateur
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Formate les données utilisateur selon le modèle défini
+        $userPreferences = FormatHelper::userPreference($row);
+        
+        // Envoie la réponse
+        sendSuccessResponse($userPreferences);
     } else {
-        sendErrorResponse("Aucun lieu trouvé.", 404);
+        sendErrorResponse("Aucune préférence trouvée pour cet utilisateur.", 404);
     }
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);

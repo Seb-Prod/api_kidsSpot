@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Classe d'aide au formatage de données pour l'API.
  *
@@ -226,5 +227,37 @@ class FormatHelper
     {
         $decoded = json_decode('"' . $value . '"', true);
         return $decoded === null ? html_entity_decode($value) : $decoded;
+    }
+
+
+    /**
+     * Méthode pour formater les données d'un utilisateur et ses préférences.
+     *
+     * Prend un tableau associatif représentant une ligne de la vue user_preference
+     * et retourne un tableau formaté contenant les informations de l'utilisateur
+     * ainsi que ses préférences (tranches d'âge et équipements).
+     *
+     * @param array $row Un tableau associatif contenant les données de l'utilisateur,
+     * avec les clés possibles : 'id_user', 'pseudo', 'mail', 'telephone', 'grade',
+     * 'date_creation', 'derniere_connexion', 'tranches_age', 'equipements'.
+     * @return array Un tableau formaté contenant les informations de l'utilisateur et ses préférences.
+     */
+    public static function userPreference(array $row): array
+    {
+        return [
+            "id" => (int)($row['id_user'] ?? 0),
+            "pseudo" => self::safeJsonDecode($row['pseudo'] ?? ''),
+            "mail" => self::safeJsonDecode($row['mail'] ?? ''),
+            "telephone" => self::safeJsonDecode($row['telephone'] ?? ''),
+            "grade" => (int)($row['grade'] ?? 0),
+            "dates" => [
+                "creation" => $row['date_creation'] ?? null,
+                "derniere_connexion" => $row['derniere_connexion'] ?? null,
+            ],
+            "preferences" => [
+                "tranches_age" => self::decodeJsonArray($row['tranches_age'] ?? ''),
+                "equipements" => self::decodeJsonArray($row['equipements'] ?? '')
+            ]
+        ];
     }
 }

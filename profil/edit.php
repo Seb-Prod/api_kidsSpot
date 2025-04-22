@@ -2,13 +2,13 @@
 
 /**
  * @file
- * API Endpoint pour l'édition du profil utilisateur'.
+ * API Endpoint pour la éditer du profil utilisateur'.
  */
 
 // Configuration des Headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: PUT");
+header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
@@ -24,7 +24,7 @@ $donnees_utilisateur = verifierAuthentification();
 validateUserAutorisation($donnees_utilisateur, 1);
 
 // Vérification de la Méthode HTTP
-if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Inclusion des Fichiers Nécessaires
     include_once '../config/Database.php';
     include_once '../models/Profil.php';
@@ -69,9 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     $profil->ages = isset($donnees['tranches_age']) ? $donnees['tranches_age'] : [];
 
     if ($profil->save()) {
-        sendCreatedResponse("La modification a été effectué.");
+        sendCreatedResponse("L'ajout a été effectué.");
     } else {
-        sendErrorResponse("La modification n'a pas été effectué.", 503);
+        sendErrorResponse("L'ajout n'a pas été effectué.", 503);
     }
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);

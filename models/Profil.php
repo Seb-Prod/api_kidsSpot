@@ -131,46 +131,14 @@ class Profil
     }
 
     public function read(){
+        $sql = "SELECT * FROM vue_user_preference WHERE id_user = :id";
+
+        $query = $this->connexion->prepare($sql);
+        $query->bindParam(':id', $this->id);
+
         try {
-            // Récupérer les préférences d'âge
-            $sql_ages = "SELECT id_tranche_age, ta.nom 
-                       FROM user_preference_age upa
-                       JOIN tranche_age ta ON upa.id_tranche_age = ta.id
-                       WHERE id_user = :id_user";
-            $query_ages = $this->connexion->prepare($sql_ages);
-            $query_ages->bindParam(":id_user", $this->id);
-            $query_ages->execute();
-            
-            $ages_data = [];
-            while ($row = $query_ages->fetch(PDO::FETCH_ASSOC)) {
-                $ages_data[] = [
-                    'id' => $row['id_tranche_age'],
-                    'nom' => $row['nom']
-                ];
-            }
-            
-            // Récupérer les préférences d'équipement
-            $sql_equip = "SELECT id_equipement, te.nom 
-                        FROM user_preference_equipement upe
-                        JOIN types_equipement te ON upe.id_equipement = te.id
-                        WHERE id_user = :id_user";
-            $query_equip = $this->connexion->prepare($sql_equip);
-            $query_equip->bindParam(":id_user", $this->id);
-            $query_equip->execute();
-            
-            $equip_data = [];
-            while ($row = $query_equip->fetch(PDO::FETCH_ASSOC)) {
-                $equip_data[] = [
-                    'id' => $row['id_equipement'],
-                    'nom' => $row['nom']
-                ];
-            }
-            
-            return [
-                'ages' => $ages_data,
-                'equipements' => $equip_data
-            ];
-            
+            $query->execute();
+            return $query;
         } catch (PDOException $e) {
             return false;
         }

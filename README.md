@@ -170,6 +170,13 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 | `/favoris/{lat}/{lgt}` | GET | Liste tous les favoris | Oui | [📖](documentation/endPoints/favoris/read.md) |
 | `/favoris/supprimer` | DELETE | Supprime un favoris | Oui | [📖](documentation/endPoints/favoris/delete.md) |
 
+### Profil (préférences de l'utilisateur)
+| Endpoint | Méthode | Description | 🔐 | 📖 |
+|----------|---------|-------------|------------------|---------------|
+| `/profil/editer` | POST | Editer les préférences de l'utilisateur | Oui | [📖](documentation/endPoints/profil/edit.md) |
+| `/profil/` | GET | Liste les préférences de l'utilisateur | Oui | [📖](documentation/endPoints/profil/read.md) |
+
+
 ## 🔐 Authentification
 
 L'API utilise l'authentification par token JWT (JSON Web Token). Pour les endpoints protégés:
