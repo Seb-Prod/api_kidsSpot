@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
 
     // Régles de validation des données
     $rules = [
-        'id_lieu' => Validator::positiveInt()
+        'id_lieu' => Validator::withMessage(Validator::positiveInt(), "L'id du lieu est obligatoire")
     ];
 
     // Vérification des données

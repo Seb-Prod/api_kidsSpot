@@ -164,11 +164,11 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 
 ### Favoris
 
-| Endpoint | Méthode | Description | Authentification | Documentation |
+| Endpoint | Méthode | Description | 🔐 | 📖 |
 |----------|---------|-------------|------------------|---------------|
-| `/favoris/ajouter` | POST | Ajoute un favoris | Oui | [Documentation](documentation/endPoints/favoris/create.md) |
-| `/favoris` | GET | Liste tous les favoris | Oui | [Documentation](documentation/endPoints/favoris/read.md) |
-| `/favoris/supprimer` | DELETE | Supprime un favoris | Oui | [Documentation](documentation/endPoints/favoris/delete.md) |
+| `/favoris/ajouter` | POST | Ajoute un favoris | Oui | [📖](documentation/endPoints/favoris/create.md) |
+| `/favoris/{lat}/{lgt}` | GET | Liste tous les favoris | Oui | [📖](documentation/endPoints/favoris/read.md) |
+| `/favoris/supprimer` | DELETE | Supprime un favoris | Oui | [📖](documentation/endPoints/favoris/delete.md) |
 
 ## 🔐 Authentification
 
