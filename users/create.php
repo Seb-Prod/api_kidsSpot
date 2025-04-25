@@ -10,6 +10,11 @@
  *
  * @date 2025-04-12
  */
+ob_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 
 // --- Configuration des Headers HTTP ---
 
@@ -19,116 +24,80 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// --- Vérification de la Méthode HTTP ---
+// Inclusion du middleware des réponses
+include_once '../middleware/ResponseHelper.php';
 
-// On s'assure que la requête HTTP reçue par le serveur est bien de type POST.
+// Vérification de la Méthode HTTP
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // --- Inclusion des Fichiers Nécessaires ---
     include_once '../config/Database.php';
     include_once '../models/Users.php';
-
-    // --- Instanciation des Objets ---
+    include_once '../middleware/Validator.php';
 
     // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Users, en passant l'objet de connexion à la base de données comme dépendance.
+    // Crée une nouvelle instance de la classe Users.
     $users = new Users($db);
 
-    // --- Récupération des Données Envoyées ---
-
     // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
-    $donnees = json_decode(file_get_contents("php://input"));
+    $donnees = (array) json_decode(file_get_contents("php://input"), true);
 
-    // --- Validation des Données Reçues ---
-
-    // Liste des champs requis avec leurs règles de validation (fonctions anonymes).
-    $validation_regles = [
-        'pseudo' => function ($val) {
-            return !empty($val) && is_string($val) && strlen($val) <= 50;
-        },
-        'mail' => function ($val) {
-            return !empty($val) && filter_var($val, FILTER_VALIDATE_EMAIL) && strlen($val) <= 100;
-        },
-        'mot_de_passe' => function ($val) {
-            // Au moins 8 caractères, une majuscule, une minuscule, un chiffre
-            return !empty($val) && is_string($val) && 
-                   strlen($val) >= 8 && 
-                   preg_match('/[A-Z]/', $val) && 
-                   preg_match('/[a-z]/', $val) && 
-                   preg_match('/[0-9]/', $val);
-        },
-        'telephone' => function ($val) {
-            // Le téléphone est optionnel, mais s'il est fourni, il doit être valide
-            return $val === null || empty($val) || 
-                  (is_string($val) && preg_match('/^[0-9]{10}$/', $val) && strlen($val) <= 20);
-        }
+    // Régles de validation des données
+    $rules = [
+        'pseudo' => Validator::withMessage(
+            Validator::requiredStringMax(50),
+            "Le pseudo est obligatoire et ne doit pas dépasser 150 caractères"
+        ),
+        'mail' => Validator::withMessage(
+            Validator::email(),
+            "Un email valide est obligatoire"
+        ),
+        'mot_de_passe' => Validator::withMessage(
+            Validator::password(),
+            "Le mot de passe doit être de 8 caractères, une majuscule, une minuscile et un chiffre"
+        ),
+        'telephone' => Validator::withMessage(
+            Validator::telephone(),
+            "Numero de téléphone doit être valide"
+        )
     ];
 
-    // Tableau pour stocker les erreurs de validation.
-    $erreurs = [];
-    // Parcours des règles de validation pour chaque champ.
-    foreach ($validation_regles as $champ => $regle) {
-        // Vérifie si le champ existe dans les données reçues et si la règle de validation est respectée.
-        if ($champ === 'telephone') {
-            // Traitement spécial pour le champ téléphone qui est optionnel
-            if (isset($donnees->$champ) && !$regle($donnees->$champ)) {
-                $erreurs[] = $champ;
-            }
-        } else {
-            // Traitement pour les champs obligatoires
-            if (!isset($donnees->$champ) || !$regle($donnees->$champ)) {
-                $erreurs[] = $champ;
-            }
+    // Vérification des données
+    $errors = Validator::validate($donnees, $rules);
+
+    // Si des erreurs
+    if (!empty($errors)) {
+        sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
+    }
+
+    // Vérification si le pseudo existe déjà
+    if (isset($donnees['pseudo']) && $users->pseudoExists($donnees['pseudo'])) {
+        sendErrorResponse("Ce pseudo existe déjà.", 409);
+    }
+
+    // Vérification si l'email existe déjà
+    if (isset($donnees['mail']) && $users->emailExists($donnees['mail'])) {
+        sendErrorResponse("Cet email existe déjà.", 409);
+    }
+
+    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $users.
+    foreach (array_keys($rules) as $champ) {
+        if (isset($donnees[$champ])) {
+            $users->$champ = $donnees[$champ];
         }
     }
 
-    // Vérification d'unicité du pseudo et de l'email
-    // Cette vérification nécessiterait d'implémenter des méthodes dans la classe Users pour vérifier si un pseudo ou un email existe déjà
-    // Pour l'exemple, nous supposons que ces validations seront gérées par les contraintes de clé unique dans la base de données
-
-    // --- Création de l'Utilisateur si les Données sont Valides ---
-
-    // Si aucune erreur de validation n'a été détectée.
-    if (empty($erreurs)) {
-        // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $users.
-        $users->pseudo = $donnees->pseudo;
-        $users->mail = $donnees->mail;
-        $users->mot_de_passe = $donnees->mot_de_passe;
-        
-        // Le téléphone est optionnel
-        if (isset($donnees->telephone) && !empty($donnees->telephone)) {
-            $users->telephone = $donnees->telephone;
-        }
-        
-        // Grade par défaut (1 = utilisateur standard)
-        $users->grade = isset($donnees->grade) && is_numeric($donnees->grade) ? $donnees->grade : 1;
-        
-        // Tentative de création de l'utilisateur dans la base de données.
-        if ($users->creer()) {
-            // Si la création a réussi, envoie un code de réponse HTTP 201 (Created) et un message JSON de succès.
-            http_response_code(201);
-            echo json_encode(["message" => "L'utilisateur a été créé avec succès"]);
-        } else {
-            // Si la création a échoué, envoie un code de réponse HTTP 503 (Service Unavailable) et un message JSON d'échec.
-            http_response_code(503);
-            echo json_encode(["message" => "La création de l'utilisateur a échoué"]);
-        }
+    // Tentative de création du lieux dans la base de données.
+    if ($users->creer()) {
+        sendCreatedResponse("L'ajout a été effectué.");
     } else {
-        // --- Gestion des Erreurs de Validation ---
-
-        // Si des erreurs de validation ont été détectées, envoie un code de réponse HTTP 400 (Bad Request) et un message JSON contenant la liste des champs invalides.
-        http_response_code(400);
-        echo json_encode([
-            "message" => "Les données fournies sont invalides.",
-            "erreurs" => $erreurs,
-        ]);
+        sendErrorResponse("L'ajout n'a pas été effectué.", 503);
     }
 } else {
-    // --- Gestion des Méthodes HTTP Non Autorisées ---
 
-    // Si la méthode de la requête HTTP n'est pas POST, envoie un code de réponse HTTP 405 (Method Not Allowed) et un message JSON indiquant que la méthode n'est pas autorisée.
-    http_response_code(405);
-    echo json_encode(["message" => "La méthode n'est pas autorisée"]);
+    sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }
+
+
+ob_end_flush();

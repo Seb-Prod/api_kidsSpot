@@ -103,31 +103,27 @@ class Users
     public function creer()
     {
         $sql = "INSERT INTO users SET 
-                pseudo=:pseudo, 
-                mail=:mail, 
-                telephone=:telephone, 
-                mot_de_passe=:mot_de_passe, 
-                grade=:grade, 
-                date_creation=NOW()";
+            pseudo = :pseudo, 
+            mail = :mail, 
+            telephone = :telephone, 
+            mot_de_passe = :mot_de_passe, 
+            grade = :grade, 
+            date_creation = NOW()";
 
         $query = $this->connexion->prepare($sql);
 
-        // Nettoyage et sécurisation des données
         $this->pseudo = htmlspecialchars(strip_tags($this->pseudo));
         $this->mail = htmlspecialchars(strip_tags($this->mail));
         $this->telephone = htmlspecialchars(strip_tags($this->telephone));
-        // Le mot de passe sera haché avant d'être inséré
         $this->mot_de_passe = password_hash($this->mot_de_passe, PASSWORD_DEFAULT);
-        $this->grade = $this->grade ?: 1; // Si grade non défini, utilisateur standard par défaut
+        $this->grade = $this->grade ?: 1;
 
-        // Liaison des valeurs
         $query->bindParam(":pseudo", $this->pseudo);
         $query->bindParam(":mail", $this->mail);
         $query->bindParam(":telephone", $this->telephone);
         $query->bindParam(":mot_de_passe", $this->mot_de_passe);
         $query->bindParam(":grade", $this->grade);
 
-        // Exécution de la requête
         if ($query->execute()) {
             return true;
         }
@@ -146,109 +142,109 @@ class Users
      * ou si aucun utilisateur avec cet ID n'a été trouvé.
      */
     public function modifier()
-{
-    // Construction dynamique de la requête SQL
-    $sql = "UPDATE users SET ";
-    $params = [];
+    {
+        // Construction dynamique de la requête SQL
+        $sql = "UPDATE users SET ";
+        $params = [];
 
-    // Mise à jour conditionnelle des champs
-    if (!empty($this->pseudo)) {
-        $params[] = "pseudo = :pseudo";
-    }
-    if (!empty($this->mail)) {
-        $params[] = "mail = :mail";
-    }
-    if (!empty($this->telephone)) {
-        $params[] = "telephone = :telephone";
-    }
-    if (!empty($this->mot_de_passe)) {
-        $params[] = "mot_de_passe = :mot_de_passe";
-    }
-    if (!empty($this->grade)) {
-        $params[] = "grade = :grade";
-    }
-    if (isset($this->tentatives_connexion)) { // Modifié de !empty à isset
-        $params[] = "tentatives_connexion = :tentatives_connexion";
-    }
-    if (isset($this->derniere_connexion)) { // Ajouté pour derniere_connexion
-        $params[] = "derniere_connexion = :derniere_connexion";
-    }
-    if (isset($this->compte_verrouille)) { // Modifié de !empty à isset
-        $params[] = "compte_verrouille = :compte_verrouille";
-    }
-    if (isset($this->date_verrouillage)) {
-        $params[] = "date_verrouillage = :date_verrouillage";
-    }
-    if (!empty($this->token_reinitialisation)) {
-        $params[] = "token_reinitialisation = :token_reinitialisation";
-    }
-    if (isset($this->date_expiration_token)) {
-        $params[] = "date_expiration_token = :date_expiration_token";
-    }
+        // Mise à jour conditionnelle des champs
+        if (!empty($this->pseudo)) {
+            $params[] = "pseudo = :pseudo";
+        }
+        if (!empty($this->mail)) {
+            $params[] = "mail = :mail";
+        }
+        if (!empty($this->telephone)) {
+            $params[] = "telephone = :telephone";
+        }
+        if (!empty($this->mot_de_passe)) {
+            $params[] = "mot_de_passe = :mot_de_passe";
+        }
+        if (!empty($this->grade)) {
+            $params[] = "grade = :grade";
+        }
+        if (isset($this->tentatives_connexion)) { // Modifié de !empty à isset
+            $params[] = "tentatives_connexion = :tentatives_connexion";
+        }
+        if (isset($this->derniere_connexion)) { // Ajouté pour derniere_connexion
+            $params[] = "derniere_connexion = :derniere_connexion";
+        }
+        if (isset($this->compte_verrouille)) { // Modifié de !empty à isset
+            $params[] = "compte_verrouille = :compte_verrouille";
+        }
+        if (isset($this->date_verrouillage)) {
+            $params[] = "date_verrouillage = :date_verrouillage";
+        }
+        if (!empty($this->token_reinitialisation)) {
+            $params[] = "token_reinitialisation = :token_reinitialisation";
+        }
+        if (isset($this->date_expiration_token)) {
+            $params[] = "date_expiration_token = :date_expiration_token";
+        }
 
-    // Vérifier si des champs ont été spécifiés pour mise à jour
-    if (empty($params)) {
-        return false; // Aucun champ à mettre à jour, ne pas exécuter la requête
-    }
+        // Vérifier si des champs ont été spécifiés pour mise à jour
+        if (empty($params)) {
+            return false; // Aucun champ à mettre à jour, ne pas exécuter la requête
+        }
 
-    // Ajout des champs à mettre à jour
-    $sql .= implode(", ", $params) . " WHERE id = :id";
+        // Ajout des champs à mettre à jour
+        $sql .= implode(", ", $params) . " WHERE id = :id";
 
-    $query = $this->connexion->prepare($sql);
+        $query = $this->connexion->prepare($sql);
 
-    // Nettoyage et sécurisation des données
-    $this->id = htmlspecialchars(strip_tags($this->id));
+        // Nettoyage et sécurisation des données
+        $this->id = htmlspecialchars(strip_tags($this->id));
 
-    // Liaison conditionnelle des paramètres
-    $query->bindParam(":id", $this->id);
+        // Liaison conditionnelle des paramètres
+        $query->bindParam(":id", $this->id);
 
-    if (!empty($this->pseudo)) {
-        $this->pseudo = htmlspecialchars(strip_tags($this->pseudo));
-        $query->bindParam(":pseudo", $this->pseudo);
-    }
-    if (!empty($this->mail)) {
-        $this->mail = htmlspecialchars(strip_tags($this->mail));
-        $query->bindParam(":mail", $this->mail);
-    }
-    if (!empty($this->telephone)) {
-        $this->telephone = htmlspecialchars(strip_tags($this->telephone));
-        $query->bindParam(":telephone", $this->telephone);
-    }
-    if (!empty($this->mot_de_passe)) {
-        $this->mot_de_passe = password_hash($this->mot_de_passe, PASSWORD_DEFAULT);
-        $query->bindParam(":mot_de_passe", $this->mot_de_passe);
-    }
-    if (!empty($this->grade)) {
-        $this->grade = htmlspecialchars(strip_tags($this->grade));
-        $query->bindParam(":grade", $this->grade);
-    }
-    if (isset($this->tentatives_connexion)) {
-        $query->bindParam(":tentatives_connexion", $this->tentatives_connexion);
-    }
-    if (isset($this->derniere_connexion)) {
-        $query->bindParam(":derniere_connexion", $this->derniere_connexion);
-    }
-    if (isset($this->compte_verrouille)) {
-        $query->bindParam(":compte_verrouille", $this->compte_verrouille);
-    }
-    if (isset($this->date_verrouillage)) {
-        $query->bindParam(":date_verrouillage", $this->date_verrouillage);
-    }
-    if (!empty($this->token_reinitialisation)) {
-        $this->token_reinitialisation = htmlspecialchars(strip_tags($this->token_reinitialisation));
-        $query->bindParam(":token_reinitialisation", $this->token_reinitialisation);
-    }
-    if (isset($this->date_expiration_token)) {
-        $query->bindParam(":date_expiration_token", $this->date_expiration_token);
-    }
+        if (!empty($this->pseudo)) {
+            $this->pseudo = htmlspecialchars(strip_tags($this->pseudo));
+            $query->bindParam(":pseudo", $this->pseudo);
+        }
+        if (!empty($this->mail)) {
+            $this->mail = htmlspecialchars(strip_tags($this->mail));
+            $query->bindParam(":mail", $this->mail);
+        }
+        if (!empty($this->telephone)) {
+            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
+            $query->bindParam(":telephone", $this->telephone);
+        }
+        if (!empty($this->mot_de_passe)) {
+            $this->mot_de_passe = password_hash($this->mot_de_passe, PASSWORD_DEFAULT);
+            $query->bindParam(":mot_de_passe", $this->mot_de_passe);
+        }
+        if (!empty($this->grade)) {
+            $this->grade = htmlspecialchars(strip_tags($this->grade));
+            $query->bindParam(":grade", $this->grade);
+        }
+        if (isset($this->tentatives_connexion)) {
+            $query->bindParam(":tentatives_connexion", $this->tentatives_connexion);
+        }
+        if (isset($this->derniere_connexion)) {
+            $query->bindParam(":derniere_connexion", $this->derniere_connexion);
+        }
+        if (isset($this->compte_verrouille)) {
+            $query->bindParam(":compte_verrouille", $this->compte_verrouille);
+        }
+        if (isset($this->date_verrouillage)) {
+            $query->bindParam(":date_verrouillage", $this->date_verrouillage);
+        }
+        if (!empty($this->token_reinitialisation)) {
+            $this->token_reinitialisation = htmlspecialchars(strip_tags($this->token_reinitialisation));
+            $query->bindParam(":token_reinitialisation", $this->token_reinitialisation);
+        }
+        if (isset($this->date_expiration_token)) {
+            $query->bindParam(":date_expiration_token", $this->date_expiration_token);
+        }
 
-    // Exécution de la requête
-    if ($query->execute()) {
-        return true;
-    }
+        // Exécution de la requête
+        if ($query->execute()) {
+            return true;
+        }
 
-    return false;
-}
+        return false;
+    }
 
     /**
      * Obtenir un utilisateur par son identifiant unique.
@@ -289,7 +285,7 @@ class Users
             return false;
         }
     }
-    
+
     /**
      * Rechercher un utilisateur par son adresse email.
      * 
@@ -308,5 +304,57 @@ class Users
         $query->execute();
 
         return $query;
+    }
+
+    /**
+     * Vérifie si un pseudo existe déjà dans la base de données
+     * 
+     * @param string $pseudo Le pseudo à vérifier
+     * @return bool Retourne true si le pseudo existe, false sinon
+     */
+    public function pseudoExists($pseudo = null)
+    {
+        try {
+            // Utilise soit le pseudo passé en paramètre, soit celui de l'objet
+            $pseudoToCheck = $pseudo ?: $this->pseudo;
+
+            $query = "SELECT COUNT(*) FROM users WHERE pseudo = :pseudo";
+            $stmt = $this->connexion->prepare($query);
+            $stmt->bindParam(':pseudo', $pseudoToCheck, PDO::PARAM_STR);
+            $stmt->execute();
+
+            // Si le compte est supérieur à 0, le pseudo existe déjà
+            return ($stmt->fetchColumn() > 0);
+        } catch (PDOException $e) {
+            // Log l'erreur et retourne false en cas d'échec
+            //error_log("Erreur lors de la vérification du pseudo: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Vérifie si un email existe déjà dans la base de données
+     * 
+     * @param string $email L'email à vérifier
+     * @return bool Retourne true si l'email existe, false sinon
+     */
+    public function emailExists($email = null)
+    {
+        try {
+            // Utilise soit l'email passé en paramètre, soit celui de l'objet
+            $emailToCheck = $email ?: $this->mail;
+
+            $query = "SELECT COUNT(*) FROM users WHERE mail = :email";
+            $stmt = $this->connexion->prepare($query);
+            $stmt->bindParam(':email', $emailToCheck, PDO::PARAM_STR);
+            $stmt->execute();
+
+            // Si le compte est supérieur à 0, l'email existe déjà
+            return ($stmt->fetchColumn() > 0);
+        } catch (PDOException $e) {
+            // Log l'erreur et retourne false en cas d'échec
+            //error_log("Erreur lors de la vérification de l'email: " . $e->getMessage());
+            return false;
+        }
     }
 }
