@@ -11,8 +11,8 @@
  */
 
 // Définir l'environnement ('development' ou 'production')
-$env = 'development'; // À commenter si en production
-//$env = 'production'; // A commenter si en dévelopement
+//$env = 'development'; // À commenter si en production
+$env = 'production'; // A commenter si en dévelopement
 
 // Chemin vers le fichier de configuration approprié
 $config_file = __DIR__ . "/config.{$env}.php";

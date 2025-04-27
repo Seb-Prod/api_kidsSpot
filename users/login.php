@@ -70,7 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 http_response_code(200);
                 echo json_encode([
                     "message" => "Connexion réussie",
-                    "token" => $token
+                    "token" => $token,
+                    "expiresIn" => 3600
                 ]);
             } else {
                 // Incrémenter les tentatives de connexion
