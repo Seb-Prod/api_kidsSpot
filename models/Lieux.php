@@ -27,6 +27,9 @@ class Lieux
     public $id_type;
     public $id_user;
 
+    public $equipements = [];
+    public $tranches_age = [];
+
     /**
      * Constructeur de la classe Lieux.
      *
