@@ -287,6 +287,35 @@ class Users
     }
 
     /**
+     * Obtenir un utilisateur par son identifiant unique.
+     *
+     * Effectue une requête SQL pour récupérer les informations d'un utilisateur spécifique en utilisant son ID.
+     *
+     * @param int $id L'identifiant unique de l'utilisateur à récupérer.
+     * @return PDOStatement|false Un objet PDOStatement contenant le résultat de la requête si elle réussit,
+     * ou `false` en cas d'erreur d'exécution.
+     */
+    public function obtenirUserId($email)
+    {
+        $sql = "SELECT 
+                u.id
+                FROM
+                users u
+                WHERE
+                u.mail = :mail";
+
+        $query = $this->connexion->prepare($sql);
+        $query->bindParam(':mail', $email);
+
+        try {
+            $query->execute();
+            return $query;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    /**
      * Rechercher un utilisateur par son adresse email.
      * 
      * @param string $email L'adresse email à rechercher.
@@ -354,6 +383,47 @@ class Users
         } catch (PDOException $e) {
             // Log l'erreur et retourne false en cas d'échec
             //error_log("Erreur lors de la vérification de l'email: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Génère un token de réinitialisation
+    public function genererTokenReinitialisation($id_user)
+    {
+        try {
+            // Génère un token lisible de 6 caractères (chiffres + lettres)
+            $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            $token = '';
+            for ($i = 0; $i < 6; $i++) {
+                $token .= $caracteres[random_int(0, strlen($caracteres) - 1)];
+            }
+
+            // Expire dans 20 minutes
+            $expiration = date('Y-m-d H:i:s', strtotime('+20 minutes'));
+
+            // Sauvegarde dans la base
+            return $this->sauvegarderTokenReinitialisation($id_user, $token, $expiration)
+                ? ['token' => $token, 'expiration' => $expiration]
+                : false;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function sauvegarderTokenReinitialisation($id_user, $token, $expiration)
+    {
+        try {
+            $query = "UPDATE users 
+              SET token_reinitialisation = :token, date_expiration_token = :expiration 
+              WHERE id = :id_user";
+            $stmt = $this->connexion->prepare($query);
+            $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+            $stmt->bindParam(':expiration', $expiration, PDO::PARAM_STR);
+            $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // error_log("Erreur lors de l'enregistrement du token : " . $e->getMessage());
             return false;
         }
     }
