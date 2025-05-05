@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     include_once '../config/Database.php';
     include_once '../models/Users.php';
     include_once '../middleware/Mailer.php'; // contient la fonction envoyerEmail()
+    include_once '../middleware/ResponseHelper.php';
 
     $database = new Database();
     $db = $database->getConnexion();
@@ -27,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Vérifie que l'email existe
         if (!$user->emailExists($email)) {
             http_response_code(404);
-            echo json_encode(["message" => "Aucun utilisateur trouvé avec cet e-mail."]);
+            sendErrorResponse("Aucun utilisateur trouvé avec cet e-mail.", 404);
             exit;
         }
 
@@ -38,8 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $result = $user->genererTokenReinitialisation($id_user);
         if (!$result) {
-            http_response_code(500);
-            echo json_encode(["message" => "Impossible de générer le token."]);
+            sendErrorResponse("Impossible de générer le token.", 500);
             exit;
         }
         
@@ -52,16 +52,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Envoi du mail
         if (envoyerEmail($email, "Mot de passe oublié", $html, $texte)) {
-            echo json_encode(["message" => "Un e-mail de réinitialisation a été envoyé."]);
+            sendCreatedResponse("Un e-mail de réinitialisation a été envoyé.");
         } else {
-            http_response_code(500);
-            echo json_encode(["message" => "Échec de l'envoi de l'e-mail."]);
+            sendErrorResponse("Échec de l'envoi de l'e-mail.", 500);
         }
     } else {
-        http_response_code(400);
-        echo json_encode(["message" => "L'e-mail est requis."]);
+        sendErrorResponse("L'e-mail est requis.", 400);
     }
 } else {
-    http_response_code(405);
-    echo json_encode(["message" => "Méthode non autorisée."]);
+    sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }

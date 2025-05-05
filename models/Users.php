@@ -414,7 +414,7 @@ class Users
     {
         try {
             $query = "UPDATE users 
-              SET token_reinitialisation = :token, date_expiration_token = :expiration 
+              SET token_reinitialisation = :token, date_expiration_token = :expiration, compte_verrouille = 1
               WHERE id = :id_user";
             $stmt = $this->connexion->prepare($query);
             $stmt->bindParam(':token', $token, PDO::PARAM_STR);
