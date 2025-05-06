@@ -392,7 +392,7 @@ class Users
     {
         try {
             // Génère un token lisible de 6 caractères (chiffres + lettres)
-            $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             $token = '';
             for ($i = 0; $i < 6; $i++) {
                 $token .= $caracteres[random_int(0, strlen($caracteres) - 1)];
@@ -426,5 +426,50 @@ class Users
             // error_log("Erreur lors de l'enregistrement du token : " . $e->getMessage());
             return false;
         }
+    }
+
+    public function changePassword()
+    {
+
+        $query = "UPDATE users
+            SET compte_verrouille = 0, mot_de_passe = :mot_de_passe, token_reinitialisation = null
+            WHERE mail = :mail";
+
+        $stmt = $this->connexion->prepare($query);
+
+        $this->mot_de_passe = password_hash($this->mot_de_passe, PASSWORD_DEFAULT);
+        $this->mail = htmlspecialchars(strip_tags($this->mail));
+
+        $stmt->bindParam(":mot_de_passe", $this->mot_de_passe);
+        $stmt->bindParam(":mail", $this->mail);
+
+        if ($stmt->execute()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function verifyResetToken()
+    {
+        $query = "SELECT id FROM users
+              WHERE mail = :mail
+              AND token_reinitialisation = :token
+              AND date_expiration_token > NOW()";
+
+        $stmt = $this->connexion->prepare($query);
+
+        // Sécurisation des données
+        $this->mail = htmlspecialchars(strip_tags($this->mail));
+        $this->token_reinitialisation = htmlspecialchars(strip_tags($this->token_reinitialisation));
+
+        // Bind des paramètres
+        $stmt->bindParam(':mail', $this->mail);
+        $stmt->bindParam(':token', $this->token_reinitialisation);
+
+        $stmt->execute();
+
+        // Vérifie s’il y a un résultat
+        return $stmt->rowCount() > 0;
     }
 }
