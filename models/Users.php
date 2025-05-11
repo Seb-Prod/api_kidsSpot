@@ -472,4 +472,35 @@ class Users
         // Vérifie s’il y a un résultat
         return $stmt->rowCount() > 0;
     }
+
+    /**
+     * Récupère tous les utilisateurs qui ont opté pour recevoir des emails
+     * 
+     * @return PDOStatement L'objet PDOStatement contenant les résultats de la requête
+     */
+    public function getUsersWithEmailOptIn()
+    {
+        $query = "SELECT id, pseudo, mail FROM users WHERE opt_in_email = 1";
+
+        $stmt = $this->connexion->prepare($query);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    /**
+     * Compte le nombre d'utilisateurs qui ont opté pour recevoir des emails
+     * 
+     * @return int Le nombre d'utilisateurs avec opt_in_email = 1
+     */
+    public function countUsersWithEmailOptIn()
+    {
+        $query = "SELECT COUNT(*) as count FROM users WHERE opt_in_email = 1";
+
+        $stmt = $this->connexion->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return (int)$row['count'];
+    }
 }

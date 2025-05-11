@@ -76,14 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Validator::longitude(),
             "La longitude doit être comprise entre -180 et 180"
         ),
-        'telephone' => Validator::withMessage(
-            Validator::telephone(),
-            "Le numéro de téléphone doit être au format français (10 chiffres)"
-        ),
-        'site_web' => Validator::withMessage(
-            Validator::url(),
-            "Le site web doit être une URL valide"
-        ),
+        
+        
         'id_type' => Validator::withMessage(
             Validator::positiveInt(),
             "Le type doit être un identifiant valide (entier positif)"
@@ -93,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             "Les tranches d'âge doivent être des identifiants uniques entre 1 et 3"
         ),
         'equipements' => Validator::withMessage(
-            Validator::arrayOfUniqueIntsInRange(1, 5),
+            Validator::arrayOfUniqueIntsInRange(1, 6),
             "Les équipements doivent être des identifiants uniques entre 1 et 5"
         ),
     ];
@@ -107,6 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'date_fin' => Validator::withMessage(
             Validator::date('d/m/Y'),
             "La date de fin doit être au format jj/mm/aaaa"
+        ),
+        'site_web' => Validator::withMessage(
+            Validator::url(),
+            "Le site web doit être une URL valide"
+        ),
+        'telephone' => Validator::withMessage(
+            Validator::telephone(),
+            "Le numéro de téléphone doit être au format français (10 chiffres)"
         ),
     ];
 

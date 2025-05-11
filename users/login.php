@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 echo json_encode([
                     "message" => "Connexion réussie",
                     "token" => $token,
+                    "grade" => $grade,
                     "expiresIn" => 3600
                 ]);
             } else {
