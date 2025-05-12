@@ -46,9 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Validator::requiredStringMax(50),
             "Le sujet du mail est obligatoire et ne doit pas dépasser 50 caractères"
         ),
-        'contenuHTML' => Validator::withMessage(
-            Validator::requiredStringMax(150),
-            "Le contenue du mail est obligatoire et ne doit pas dépasser 150 caractères"
+        'contenueHTML' => Validator::withMessage(
+            Validator::requiredStringMax(500),
+            "Le contenue du mail est obligatoire et ne doit pas dépasser 500 caractères"
         )
 
     ];
@@ -62,10 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $sujet = $donnees['sujet'];
-    $contenuHTML = $donnees['contenuHTML'];
+    $contenuHTML = $donnees['contenueHTML'];
 
     // Récupération de tous les utilisateurs qui ont opté pour recevoir des emails
     $users = $user->getUsersWithEmailOptIn()->fetchAll(PDO::FETCH_ASSOC);
+
+
+    $countSuccess = 0;
+    $countFailed = 0;
 
     // Envoi des emails à chaque utilisateur
     foreach ($users as $userData) {
@@ -73,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $emailContent = str_replace('{PSEUDO}', $userData['pseudo'], $contenuHTML);
         
         // Envoi de l'email
-        if (envoyerEmail($userData['mail'], $sujet, $emailContent, $contenuTexte)) {
+        if (envoyerEmail($userData['mail'], $sujet, $contenuHTML)) {
             $countSuccess++;
         } else {
             $countFailed++;
@@ -86,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Journal des emails envoyés
     $logMessage = date('Y-m-d H:i:s') . " - Envoi groupé: $countSuccess réussis, $countFailed échoués. Sujet: " . substr($sujet, 0, 50);
-    error_log($logMessage, 3, "../logs/email.log");
+    //error_log($logMessage, 3, "../logs/email.log");
 
     // Réponse
     $response = [

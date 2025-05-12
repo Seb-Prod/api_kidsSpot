@@ -144,8 +144,8 @@ class Lieux
             $this->code_postal = htmlspecialchars(strip_tags($this->code_postal));
             $this->latitude = htmlspecialchars(strip_tags($this->latitude));
             $this->longitude = htmlspecialchars(strip_tags($this->longitude));
-            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
-            $this->site_web = htmlspecialchars(strip_tags($this->site_web));
+            $this->telephone = !empty($this->telephone) ? htmlspecialchars(strip_tags($this->telephone)) : null;
+            $this->site_web = !empty($this->site_web) ? htmlspecialchars(strip_tags($this->site_web)) : null;
             $this->date_creation = date('Y-m-d');
             $this->date_modification = date('Y-m-d');
             $this->id_type = htmlspecialchars(strip_tags($this->id_type));
@@ -291,8 +291,8 @@ class Lieux
             $this->code_postal = htmlspecialchars(strip_tags($this->code_postal));
             $this->latitude = htmlspecialchars(strip_tags($this->latitude));
             $this->longitude = htmlspecialchars(strip_tags($this->longitude));
-            $this->telephone = htmlspecialchars(strip_tags($this->telephone));
-            $this->site_web = htmlspecialchars(strip_tags($this->site_web));
+            $this->telephone = !empty($this->telephone) ? htmlspecialchars(strip_tags($this->telephone)) : null;
+            $this->site_web = !empty($this->site_web) ? htmlspecialchars(strip_tags($this->site_web)) : null;
             $this->date_modification = date('Y-m-d H:i:s');
             $this->id_type = htmlspecialchars(strip_tags($this->id_type));
             $id = htmlspecialchars(strip_tags($this->id));

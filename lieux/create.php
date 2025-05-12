@@ -5,6 +5,11 @@
  * API Endpoint pour la création d'un nouveau lieu.
  */
 
+ob_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Configuration des Headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -76,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Validator::longitude(),
             "La longitude doit être comprise entre -180 et 180"
         ),
-        
-        
+
+
         'id_type' => Validator::withMessage(
             Validator::positiveInt(),
             "Le type doit être un identifiant valide (entier positif)"
@@ -91,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             "Les équipements doivent être des identifiants uniques entre 1 et 5"
         ),
     ];
-    
+
     // Règles pour les relations (peuvent être optionnelles)
     $optionalRules = [
         'date_debut' => Validator::withMessage(
@@ -164,3 +169,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }
+
+ob_end_flush();
