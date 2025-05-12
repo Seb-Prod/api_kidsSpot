@@ -14,3 +14,5 @@ Thumbs.db
 
 # config
 /config/config.production.php
+/config/config.mail.development.php
+/config/config.mail.production.php
