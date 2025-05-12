@@ -254,6 +254,7 @@ class FormatHelper
                 "creation" => $row['date_creation'] ?? null,
                 "derniere_connexion" => $row['derniere_connexion'] ?? null,
             ],
+            "recevoirMail" => (bool)($row['opt_in_email'] ?? false),
             "preferences" => [
                 "tranches_age" => self::decodeJsonArray($row['tranches_age'] ?? ''),
                 "equipements" => self::decodeJsonArray($row['equipements'] ?? '')

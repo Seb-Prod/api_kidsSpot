@@ -16,7 +16,7 @@ $env = 'production'; // A commenter si en dévelopement
 
 // Chemin vers le fichier de configuration approprié
 $config_file = __DIR__ . "/config.{$env}.php";
-$mail_config_file = __DIR__ . "/congig.mail.{$env}.php";
+$mail_config_file = __DIR__ . "/config.mail.{$env}.php";
 
 // Vérifier que le fichier existe
 if (!file_exists($config_file) || !file_exists($mail_config_file)) {
@@ -34,4 +34,4 @@ $config = require $config_file;
 $mail_config = require $mail_config_file;
 
 // Return la configuration
-return array_merge($db_config, ['mail' => $mail_config]);
+return array_merge($config, ['mail' => $mail_config]);
