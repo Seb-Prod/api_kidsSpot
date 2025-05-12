@@ -16,9 +16,10 @@ $env = 'production'; // A commenter si en dévelopement
 
 // Chemin vers le fichier de configuration approprié
 $config_file = __DIR__ . "/config.{$env}.php";
+$mail_config_file = __DIR__ . "/congig.mail.{$env}.php";
 
 // Vérifier que le fichier existe
-if (!file_exists($config_file)) {
+if (!file_exists($config_file) || !file_exists($mail_config_file)) {
     // Réponse d'erreur en JSON
     header('Content-Type: application/json');
     echo json_encode([
@@ -30,6 +31,7 @@ if (!file_exists($config_file)) {
 
 // Charger la configuration
 $config = require $config_file;
+$mail_config = require $mail_config_file;
 
 // Return la configuration
-return $config;
+return array_merge($db_config, ['mail' => $mail_config]);

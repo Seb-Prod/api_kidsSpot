@@ -1,4 +1,5 @@
 <?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -9,20 +10,34 @@ require_once __DIR__ . '/../lib/PHPMailer/Exception.php';
 
 function envoyerEmail($destinataire, $sujet, $contenuHTML, $contenuTexte = '')
 {
+    $config = require __DIR__ . '/../config/config.php';
+    $mailConfig = $config['mail'];
     $mail = new PHPMailer(true);
 
     try {
-        // Configuration SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'kidspottp@gmail.com';
-        $mail->Password = 'zcnw vpsy yobn ayis'; // mot de passe d’application (non le mot de passe Gmail)
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
+        $mail->Host = $mailConfig['smtp_host'];
+        $mail->SMTPAuth = $mailConfig['smtp_auth'];
+        $mail->Username = $mailConfig['smtp_username'];
+        $mail->Password = $mailConfig['smtp_password'];
+        $mail->Port = $mailConfig['smtp_port'];
 
-        // Paramètres de l'email
-        $mail->setFrom('kidspottp@gmail.com', 'Kids Spot');
+        $secure = $mailConfig['smtp_secure'];
+
+        switch ($secure) {
+            case 'tls':
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                break;
+            case 'ssl':
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                break;
+            default:
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+
+
+        $mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
         $mail->addAddress($destinataire);
 
         $mail->isHTML(true);
