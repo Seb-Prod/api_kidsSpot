@@ -161,8 +161,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $date_fin = isset($donnees['date_fin']) ? convertirDateFrancaisVersUs($donnees['date_fin']) : null;
 
     // Tentative de création du lieux dans la base de données.
-    if ($lieux->create($equipements, $tranches_age, $date_debut, $date_fin)) {
-        sendCreatedResponse("L'ajout a été effectué.");
+    $lieu_id = $lieux->create($equipements, $tranches_age, $date_debut, $date_fin);
+    if ($lieu_id) {
+        sendSuccessResponse([
+        "message" => "L'ajout a été effectué.",
+        "id" => $lieu_id
+    ], 201);
     } else {
         sendErrorResponse("L'ajout n'a pas été effectué.", 503);
     }
