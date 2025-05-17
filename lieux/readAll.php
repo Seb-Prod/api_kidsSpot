@@ -5,60 +5,65 @@
  * Endpoint API pour récupérer une liste de lieux situés autour de coordonnées géographiques spécifiées.
  */
 
-// Configuration des Headers HTTP
+// Configuration des headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+// Inclusion du middleware pour les réponses
 include_once '../middleware/ResponseHelper.php';
 
-// Vérification de la Méthode HTTP
+// Vérifie que la méthode utilisée est bien GET
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    // --- Inclusion des Fichiers Nécessaires ---
+
+    // Inclusion des fichiers nécessaires
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/CoordinatesValidator.php';
     include_once '../middleware/FormatHelper.php';
 
-    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
+    // Connexion à la base de données
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Lieux.
+    // Création d’un objet Lieux
     $lieux = new Lieux($db);
 
-    // Récupération et validation des coordonnées
+    // Récupération et validation des coordonnées passées en paramètres
     $coordinates = validateCoordinates();
     if ($coordinates === false) {
         sendErrorResponse("Coordonnées invalides.", 400);
         exit;
     }
+
     $latitude = $coordinates['latitude'];
     $longitude = $coordinates['longitude'];
 
-    // Appel à la Méthode du Modèle
+    // Récupération des lieux autour des coordonnées
     $stmt = $lieux->getPlacesAround($latitude, $longitude);
 
-    // Vérifie si l'exécution de la requête a réussi et s'il y a au moins un résultat.
+    // Vérifie s'il y a des résultats
     if ($stmt && $stmt->rowCount() > 0) {
-        // Initialisation d'un tableau associatif pour stocker les lieux trouvés.
         $tableauLieux = [];
 
-        // Boucle à travers chaque ligne (chaque lieu) retournée par la requête.
+        // Boucle sur chaque lieu trouvé
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            extract($row);
-            // Définit la structure d'un tableau représentant un lieu individuel.
+            // Formate les données du lieu
             $unLieu = FormatHelper::lieuLight($row);
-            // Ajoute le lieu formaté au tableau principal des lieux.
+            // Ajoute le lieu au tableau de résultats
             $tableauLieux[] = $unLieu;
         }
-        // envoie la réponse
+
+        // Réponse avec les lieux trouvés
         sendSuccessResponse($tableauLieux);
     } else {
+        // Aucun lieu trouvé
         sendErrorResponse("Aucun lieu trouvé.", 404);
     }
+
 } else {
+    // Méthode HTTP non autorisée
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }

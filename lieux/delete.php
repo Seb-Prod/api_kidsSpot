@@ -5,42 +5,37 @@
  * Endpoint API pour supprimer un lieu spécifique en fonction de son ID.
  */
 
-// Configuration des Headers HTTP
+// Headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Inclusion du middleware d'authentification
+// Vérifie que l'utilisateur est authentifié et autorisé (niveau 4 requis)
 include_once '../middleware/auth_middleware.php';
 include_once '../middleware/UserAutorisation.php';
-
-// Inclusion du middleware des réponses
 include_once '../middleware/ResponseHelper.php';
 
-// Vérification de l'authentification
 $donnees_utilisateur = verifierAuthentification();
 validateUserAutorisation($donnees_utilisateur, 4);
 
-// Vérification de la Méthode HTTP
+// Vérifie que la méthode HTTP est DELETE
 if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
-    // --- Inclusion des Fichiers Nécessaires ---
+    // Connexion à la base de données et inclusion des fichiers nécessaires
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/Validator.php';
 
-    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Lieux.
     $lieux = new Lieux($db);
 
-    // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
+    // Récupère les données envoyées dans le corps de la requête (JSON)
     $donnees = (array) json_decode(file_get_contents("php://input"), true);
 
-    // Régles de validation des données
+    // Règle de validation : l'ID doit être un entier positif
     $rules = [
         'id' => Validator::withMessage(
             Validator::positiveInt(),
@@ -48,30 +43,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         )
     ];
 
-    // Vérification des données
+    // Vérifie les données
     $errors = Validator::validate($donnees, $rules);
 
-    // Si des erreurs
     if (!empty($errors)) {
+        // Si erreur de validation, retourne une réponse d'erreur
         sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
     }
 
-    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
+    // Affecte l'ID reçu à l'objet $lieux
     foreach (array_keys($rules) as $champ) {
         $lieux->$champ = $donnees[$champ];
     }
 
-    // Vérification si le lieux existe
+    // Vérifie si le lieu existe
     if (!$lieux->exist()) {
         sendErrorResponse("Ce lieux n'existe pas.", 404);
     }
 
-    // Tentative de suppression du lieux dans la base de données.
+    // Supprime le lieu
     if ($lieux->delete()) {
         sendDeletedResponse();
     } else {
         sendErrorResponse("La suppression n'a pas été effectuée.", 503);
     }
 } else {
+    // Méthode non autorisée
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }

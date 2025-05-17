@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ),
         'equipements' => Validator::withMessage(
             Validator::arrayOfUniqueIntsInRange(1, 6),
-            "Les équipements doivent être des identifiants uniques entre 1 et 5"
+            "Les équipements doivent être des identifiants uniques entre 1 et 6"
         ),
     ];
 
