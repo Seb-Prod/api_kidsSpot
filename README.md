@@ -107,9 +107,11 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 ┣ 📂 documentation/         # Documentation technique détaillée par endpoint.
 ┣ 📂 errors/                # Contient les pages d'erreurs personnalisées pour certaines situations.
 ┣ 📂 favoris/               # Contient les endpoints pour les favoris.
+┣ 📂 lib/
 ┣ 📂 lieux/                 # Contient les endpoints pour les lieux.
 ┣ 📂 middleware/            # Contient les classes d'aide pour la validation, la sécurité, les autorisations et le formatage des données.
 ┣ 📂 models/                # Contient les classes PHP représentant les tables de la base de données.
+┣ 📂 profil/                # Contient les endpoints pour les préférence utilisateur.
 ┣ 📂 sql/                   # Contient les fichiers SQL nécessaires à la création de la base de données.
 ┗ 📂 users/                 # Contient les endpoints pour les users.
 
@@ -139,6 +141,7 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 | 3  | Micro-ondes |
 | 4  | Chaise haute |
 | 5  | Table à langer |
+| 6  | Parking |
 
 ## 🌐 Points d'accès API
 
@@ -169,6 +172,16 @@ Le projet est organisé par logique métier, chaque dossier correspond à un mod
 | `/favoris/ajouter` | POST | Ajoute un favoris | Oui | [📖](documentation/endPoints/favoris/create.md) |
 | `/favoris/{lat}/{lgt}` | GET | Liste tous les favoris | Oui | [📖](documentation/endPoints/favoris/read.md) |
 | `/favoris/supprimer` | DELETE | Supprime un favoris | Oui | [📖](documentation/endPoints/favoris/delete.md) |
+
+### User
+| Endpoint | Méthode | Description | 🔐 | 📖 |
+|----------|---------|-------------|------------------|---------------|
+| `/users/create.php`| POST | Ajoute un user | Non |[📖](documentation/endPoints/users/create_user.md) |
+| `/users/forgot.php`| POST | Envoie un mail avec un token de récupération | Non |[📖](documentation/endPoints/users/reset_password_request.md) |
+| `/users/login.php`| POST | L'authentification des utilisateurs | Non |[📖](documentation/endPoints/users/login_user.md) |
+| `/users/reset.php`| POST | Réinitialisation du mot de passe via un token | Non |[📖](documentation/endPoints/users/create_user.md) |
+| `/users/sendMail.php`| POST | L'envoi d'emails groupés aux utilisateurs | Oui |[📖](documentation/endPoints/users/create_user.md) |
+| `/users/update.php`| PUT | Mise à jour du profil utilisateur | Oui |[📖](documentation/endPoints/users/create_user.md) |
 
 ### Profil (préférences de l'utilisateur)
 | Endpoint | Méthode | Description | 🔐 | 📖 |

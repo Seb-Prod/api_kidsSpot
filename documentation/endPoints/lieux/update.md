@@ -23,8 +23,8 @@ Le rôle de l'utilisateur doit être **≥ 4** (autorisation nécessaire).
 | `code_postal`     | `string`         | Code postal                                                | ✅ Oui      | Format français `XXXXX`                           |
 | `latitude`        | `float`          | Latitude GPS                                               | ✅ Oui      | Doit être compris entre `-90` et `90`             |
 | `longitude`       | `float`          | Longitude GPS                                              | ✅ Oui      | Doit être compris entre `-180` et `180`           |
-| `telephone`       | `string`         | Numéro de téléphone                                        | ✅ Oui      | Format français / international valide            |
-| `site_web`        | `string`         | URL vers le site officiel                                  | ✅ Oui      | URL valide                                        |
+| `telephone`       | `string`         | Numéro de téléphone                                        | ❌ Optionnel      | Format français / international valide            |
+| `site_web`        | `string`         | URL vers le site officiel                                  | ❌ Optionnel      | URL valide                                        |
 | `id_type`         | `int`            | Type de lieu (référence d'une table `types`)               | ✅ Oui      | Entier strictement positif                        |
 | `tranches_age`    | `array<int>`      | Liste des ID de tranches d’âge associées                   | ✅ Oui      | Tableaux d'entiers, valeurs 1 à 3                 |
 | `equipements`     | `array<int>`      | Liste des ID d'équipements associés                        | ✅ Oui      | Tableaux d'entiers, valeurs 1 à 5                 |
