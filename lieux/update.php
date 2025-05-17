@@ -80,14 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             Validator::longitude(),
             "La longitude doit être comprise entre -180 et 180"
         ),
-        'telephone' => Validator::withMessage(
-            Validator::telephone(),
-            "Le numéro de téléphone doit être au format français (10 chiffres)"
-        ),
-        'site_web' => Validator::withMessage(
-            Validator::url(),
-            "Le site web doit être une URL valide"
-        ),
+        
         'id_type' => Validator::withMessage(
             Validator::positiveInt(),
             "Le type doit être un identifiant valide (entier positif)"
@@ -112,6 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             Validator::date('d/m/Y'),
             "La date de fin doit être au format jj/mm/aaaa"
         ),
+        'site_web' => Validator::withMessage(
+            Validator::url(),
+            "Le site web doit être une URL valide"
+        ),
+        'telephone' => Validator::withMessage(
+            Validator::telephone(),
+            "Le numéro de téléphone doit être au format français (10 chiffres)"
+        ),
     ];
 
     // Vérification des données
@@ -128,6 +129,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             $errors = Validator::validate([$dateKey => $donnees[$dateKey]], [$dateKey => $optionalRules[$dateKey]]);
             if (!empty($errors)) {
                 sendValidationErrorResponse("La {$dateKey} fournie est invalide.", $errors, 400);
+            }
+        }
+    }
+
+    foreach(['telephone', 'site_web'] as $optionKey){
+        if(isset($donnees[$optionKey]) && $donnees[$optionKey] != ''){
+            $errors = Validator::validate([$optionKey => $donnees[$optionKey]],[$optionKey=>$optionalRules[$optionKey]]);
+            if (!empty($errors)){
+                sendValidationErrorResponse("Le {$optionKey} fournie est invalide.", $errors,400);
             }
         }
     }
@@ -156,6 +166,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     // Assignation des dates (uniquement si c'est un évenement)
     $date_debut = isset($donnees['date_debut']) ? convertirDateFrancaisVersUs($donnees['date_debut']) : null;
     $date_fin = isset($donnees['date_fin']) ? convertirDateFrancaisVersUs($donnees['date_fin']) : null;
+
+    // Assignation du site web et téléphone si existe
+    $lieux->telephone = isset($donnees['telephone']) ? $donnees['telephone'] : null;
+    $lieux->site_web = isset($donnees['site_web']) ? $donnees['site_web'] : null;
 
     // Vérification si le lieux existe
     if (!$lieux->exist()) {

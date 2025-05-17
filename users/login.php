@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mot_de_passe_hash = $row['mot_de_passe'];
             $grade = $row['grade'];
             $compte_verrouille = $row['compte_verrouille'];
+            $pseudo = $row['pseudo'];
             
             // Vérifier si le compte est verrouillé
             if ($compte_verrouille) {
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $token = $jwt->generer([
                     "id" => $id,
                     "email" => $email,
-                    "grade" => $grade
+                    "grade" => $grade,
                 ]);
                 
                 // Réponse avec le token
@@ -72,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     "message" => "Connexion réussie",
                     "token" => $token,
                     "grade" => $grade,
+                    "pseudo" => $pseudo,
                     "expiresIn" => 3600
                 ]);
             } else {

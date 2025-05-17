@@ -333,7 +333,7 @@ class Users
      */
     public function rechercherParEmail($email)
     {
-        $sql = "SELECT id, mail, mot_de_passe, grade, compte_verrouille, tentatives_connexion 
+        $sql = "SELECT id, pseudo, mail, mot_de_passe, grade, compte_verrouille, tentatives_connexion 
             FROM users 
             WHERE mail = :mail";
 

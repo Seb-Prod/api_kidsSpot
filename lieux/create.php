@@ -135,6 +135,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    foreach(['telephone', 'site_web'] as $optionKey){
+        if(isset($donnees[$optionKey]) && $donnees[$optionKey] != ''){
+            $errors = Validator::validate([$optionKey => $donnees[$optionKey]],[$optionKey=>$optionalRules[$optionKey]]);
+            if (!empty($errors)){
+                sendValidationErrorResponse("Le {$optionKey} fournie est invalide.", $errors,400);
+            }
+        }
+    }
+
     // Vérification de cohérence pour les dates
     if ((isset($donnees['date_debut']) && !isset($donnees['date_fin'])) ||
         (!isset($donnees['date_debut']) && isset($donnees['date_fin']))
@@ -149,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+
     // Assignation de l'id de l'user
     $lieux->id_user = $donnees_utilisateur['id'];
 
@@ -159,6 +169,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Assignation des dates (uniquement si c'est un évenement)
     $date_debut = isset($donnees['date_debut']) ? convertirDateFrancaisVersUs($donnees['date_debut']) : null;
     $date_fin = isset($donnees['date_fin']) ? convertirDateFrancaisVersUs($donnees['date_fin']) : null;
+
+    // Assignation du site web et téléphone si existe
+    $lieux->telephone = isset($donnees['telephone']) ? $donnees['telephone'] : null;
+    $lieux->site_web = isset($donnees['site_web']) ? $donnees['site_web'] : null;
 
     // Tentative de création du lieux dans la base de données.
     $lieu_id = $lieux->create($equipements, $tranches_age, $date_debut, $date_fin);

@@ -136,11 +136,11 @@ class Lieux
             $query = $this->connexion->prepare($sql);
 
             // Nettoyage et sécurisation des données
-            $this->nom = htmlspecialchars(strip_tags($this->nom));
-            $this->description = htmlspecialchars(strip_tags($this->description));
-            $this->horaires = htmlspecialchars(strip_tags($this->horaires));
-            $this->adresse = htmlspecialchars(strip_tags($this->adresse));
-            $this->ville = htmlspecialchars(strip_tags($this->ville));
+            $this->nom = strip_tags($this->nom);
+            $this->description = strip_tags($this->description);
+            $this->horaires = strip_tags($this->horaires);
+            $this->adresse = strip_tags($this->adresse);
+            $this->ville = strip_tags($this->ville);
             $this->code_postal = htmlspecialchars(strip_tags($this->code_postal));
             $this->latitude = htmlspecialchars(strip_tags($this->latitude));
             $this->longitude = htmlspecialchars(strip_tags($this->longitude));
@@ -283,19 +283,19 @@ class Lieux
             $query_lieu = $this->connexion->prepare($sql_lieu);
 
             // Nettoyage et sécurisation des données
-            $this->nom = htmlspecialchars(strip_tags($this->nom));
-            $this->description = htmlspecialchars(strip_tags($this->description));
-            $this->horaires = htmlspecialchars(strip_tags($this->horaires));
-            $this->adresse = htmlspecialchars(strip_tags($this->adresse));
-            $this->ville = htmlspecialchars(strip_tags($this->ville));
-            $this->code_postal = htmlspecialchars(strip_tags($this->code_postal));
-            $this->latitude = htmlspecialchars(strip_tags($this->latitude));
-            $this->longitude = htmlspecialchars(strip_tags($this->longitude));
-            $this->telephone = !empty($this->telephone) ? htmlspecialchars(strip_tags($this->telephone)) : null;
-            $this->site_web = !empty($this->site_web) ? htmlspecialchars(strip_tags($this->site_web)) : null;
+            $this->nom = strip_tags($this->nom);
+            $this->description = strip_tags($this->description);
+            $this->horaires = strip_tags($this->horaires);
+            $this->adresse = strip_tags($this->adresse);
+            $this->ville = strip_tags($this->ville);
+            $this->code_postal = strip_tags($this->code_postal);
+            $this->latitude = strip_tags($this->latitude);
+            $this->longitude = strip_tags($this->longitude);
+            $this->telephone = !empty($this->telephone) ? strip_tags($this->telephone) : null;
+            $this->site_web = !empty($this->site_web) ? strip_tags($this->site_web) : null;
             $this->date_modification = date('Y-m-d H:i:s');
-            $this->id_type = htmlspecialchars(strip_tags($this->id_type));
-            $id = htmlspecialchars(strip_tags($this->id));
+            $this->id_type = strip_tags($this->id_type);
+            $id = strip_tags($this->id);
 
             // Liaison des valeurs pour la table lieux
             $query_lieu->bindParam(":nom", $this->nom);
