@@ -240,12 +240,15 @@ Le token a une durée de validité limitée et devra être renouvelé périodiqu
 | Classe | 📖 |
 |--------|----------------|
 | /middleware/Validator.php | [📖](documentation/classes/validator.md) |
+| /middleware/FormatHelper.php | [📖](documentation/classes/formatHelper.md) |
+
 
 ### Fonctions
 | Fonctions | 📖 |
 |--------|----------------|
 | /middleware/UserAutorisation.php | [📖](documentation/fonctions/UserAutorisation.md) |
-
+| /middleware/ResponseHelper.php | [📖](documentation/fonctions/ResponseHelper.md) |
+| /middleware/Mailer.php | [📖](documentation/fonctions/Mailer.md) |
 ### Autres documentation
 
 - [Système d'authentification et base de données](documentation/authentificationEtBdd.md)
