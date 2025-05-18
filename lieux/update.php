@@ -1,49 +1,45 @@
 <?php
-
 /**
  * @file
- * Endpoint API pour modifier un lieux.
+ * Endpoint API pour modifier un lieu.
  */
 
-// Configuration des Headers HTTP
+// --- Configuration des Headers HTTP ---
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: PUT");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Inclusion du middleware d'authentification
+// --- Middlewares ---
 include_once '../middleware/auth_middleware.php';
 include_once '../middleware/UserAutorisation.php';
-
-// Inclusion du middleware des réponses
 include_once '../middleware/ResponseHelper.php';
 
-// Vérification de l'authentification
+// Authentification et autorisation
 $donnees_utilisateur = verifierAuthentification();
 validateUserAutorisation($donnees_utilisateur, 1);
 
-// Vérification de la Méthode HTTP
-if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
-    // Inclusion des Fichiers Nécessaires
+// Vérification de la méthode HTTP
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    // --- Dépendances ---
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/Validator.php';
     include_once '../middleware/Helpers.php';
 
-    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
+    // Connexion à la base de données
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Lieux.
-    $lieux = new Lieux($db);
+    // Instanciation du modèle Lieux
+    $lieu = new Lieux($db);
 
-    // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
+    // Décodage des données JSON
     $donnees = (array) json_decode(file_get_contents("php://input"), true);
 
-    // Régles de validation des données
+    // Règles de validation obligatoires
     $rules = [
-        // Champs principaux du lieu
         'id' => Validator::withMessage(
             Validator::positiveInt(),
             "L'identifiant doit être un entier positif"
@@ -80,14 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             Validator::longitude(),
             "La longitude doit être comprise entre -180 et 180"
         ),
-        'telephone' => Validator::withMessage(
-            Validator::telephone(),
-            "Le numéro de téléphone doit être au format français (10 chiffres)"
-        ),
-        'site_web' => Validator::withMessage(
-            Validator::url(),
-            "Le site web doit être une URL valide"
-        ),
         'id_type' => Validator::withMessage(
             Validator::positiveInt(),
             "Le type doit être un identifiant valide (entier positif)"
@@ -97,12 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             "Les tranches d'âge doivent être des identifiants uniques entre 1 et 3"
         ),
         'equipements' => Validator::withMessage(
-            Validator::arrayOfUniqueIntsInRange(1, 5),
-            "Les équipements doivent être des identifiants uniques entre 1 et 5"
+            Validator::arrayOfUniqueIntsInRange(1, 6),
+            "Les équipements doivent être des identifiants uniques entre 1 et 6"
         ),
     ];
-    
-    // Règles pour les relations (peuvent être optionnelles)
+
+    // Règles facultatives
     $optionalRules = [
         'date_debut' => Validator::withMessage(
             Validator::date('d/m/Y'),
@@ -112,61 +100,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             Validator::date('d/m/Y'),
             "La date de fin doit être au format jj/mm/aaaa"
         ),
+        'site_web' => Validator::withMessage(
+            Validator::url(),
+            "Le site web doit être une URL valide"
+        ),
+        'telephone' => Validator::withMessage(
+            Validator::telephone(),
+            "Le numéro de téléphone doit être au format français (10 chiffres)"
+        ),
     ];
 
-    // Vérification des données
+    // Validation des champs obligatoires
     $errors = Validator::validate($donnees, $rules);
-
-    // Si des erreurs
     if (!empty($errors)) {
         sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
     }
 
-    // Validation des dates si elles sont présentes
-    foreach (['date_debut', 'date_fin'] as $dateKey) {
-        if (isset($donnees[$dateKey])) {
-            $errors = Validator::validate([$dateKey => $donnees[$dateKey]], [$dateKey => $optionalRules[$dateKey]]);
+    // Validation des champs facultatifs
+    foreach (['date_debut', 'date_fin', 'site_web', 'telephone'] as $champ) {
+        if (!empty($donnees[$champ])) {
+            $errors = Validator::validate([$champ => $donnees[$champ]], [$champ => $optionalRules[$champ]]);
             if (!empty($errors)) {
-                sendValidationErrorResponse("La {$dateKey} fournie est invalide.", $errors, 400);
+                sendValidationErrorResponse("Le champ {$champ} est invalide.", $errors, 400);
             }
         }
     }
 
-    // Vérification de cohérence pour les dates
+    // Cohérence entre les dates
     if ((isset($donnees['date_debut']) && !isset($donnees['date_fin'])) ||
-        (!isset($donnees['date_debut']) && isset($donnees['date_fin']))
-    ) {
-        sendValidationErrorResponse("Si une date est fournie, les dates de début et de fin doivent toutes deux être renseignées.", ['date_debut', 'date_fin'], 400);
+        (!isset($donnees['date_debut']) && isset($donnees['date_fin']))) {
+        sendValidationErrorResponse(
+            "Si une date est fournie, les dates de début et de fin doivent toutes deux être renseignées.",
+            ['date_debut', 'date_fin'],
+            400
+        );
     }
 
-    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $lieux.
+    // Hydratation des champs
     foreach (array_keys($rules) as $champ) {
         if (isset($donnees[$champ])) {
-            $lieux->$champ = $donnees[$champ];
+            $lieu->$champ = $donnees[$champ];
         }
     }
 
-    // Assignation de l'id de l'user
-    $lieux->id_user = $donnees_utilisateur['id'];
+    $lieu->id_user = $donnees_utilisateur['id'];
+    $lieu->telephone = $donnees['telephone'] ?? null;
+    $lieu->site_web = $donnees['site_web'] ?? null;
 
-    // Assiggnation des équipement et tranche d'age
-    $equipements = isset($donnees['equipements']) ? $donnees['equipements'] : [];
-    $tranches_age = isset($donnees['tranches_age']) ? $donnees['tranches_age'] : [];
+    $equipements = $donnees['equipements'] ?? [];
+    $tranches_age = $donnees['tranches_age'] ?? [];
 
-    // Assignation des dates (uniquement si c'est un évenement)
     $date_debut = isset($donnees['date_debut']) ? convertirDateFrancaisVersUs($donnees['date_debut']) : null;
     $date_fin = isset($donnees['date_fin']) ? convertirDateFrancaisVersUs($donnees['date_fin']) : null;
 
-    // Vérification si le lieux existe
-    if (!$lieux->exist()) {
-        sendErrorResponse("Ce lieux n'existe pas.", 404);
+    // Vérification de l'existence du lieu
+    if (!$lieu->exist()) {
+        sendErrorResponse("Ce lieu n'existe pas.", 404);
     }
 
-    // Tentative de création du commentaire dans la base de données.
-    if ($lieux->update($equipements, $tranches_age, $date_debut, $date_fin)) {
+    // Mise à jour en base
+    if ($lieu->update($equipements, $tranches_age, $date_debut, $date_fin)) {
         sendUpdatedResponse();
     } else {
-        sendErrorResponse("La modification n'a pas été effectué.", 503);
+        sendErrorResponse("La modification n'a pas été effectuée.", 503);
     }
 } else {
     sendErrorResponse("La méthode n'est pas autorisée.", 405);

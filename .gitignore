@@ -16,3 +16,6 @@ Thumbs.db
 /config/config.production.php
 /config/config.mail.development.php
 /config/config.mail.production.php
+.env
+.env.local
+.env.production

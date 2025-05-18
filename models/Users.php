@@ -79,6 +79,8 @@ class Users
      */
     public $date_expiration_token;
 
+    public $opt_in_email;
+
     /**
      * Constructeur de la classe Users.
      * 
@@ -145,6 +147,7 @@ class Users
     {
         // Construction dynamique de la requête SQL
         $sql = "UPDATE users SET ";
+
         $params = [];
 
         // Mise à jour conditionnelle des champs
@@ -180,6 +183,9 @@ class Users
         }
         if (isset($this->date_expiration_token)) {
             $params[] = "date_expiration_token = :date_expiration_token";
+        }
+        if(isset($this->opt_in_email)){
+            $params[] = "opt_in_email = :opt_in_email";
         }
 
         // Vérifier si des champs ont été spécifiés pour mise à jour
@@ -236,6 +242,10 @@ class Users
         }
         if (isset($this->date_expiration_token)) {
             $query->bindParam(":date_expiration_token", $this->date_expiration_token);
+        }
+        if(isset($this->opt_in_email)){
+            $this->opt_in_email = htmlspecialchars(strip_tags($this->opt_in_email));
+            $query->bindParam(":opt_in_email", $this->opt_in_email);
         }
 
         // Exécution de la requête
@@ -323,7 +333,7 @@ class Users
      */
     public function rechercherParEmail($email)
     {
-        $sql = "SELECT id, mail, mot_de_passe, grade, compte_verrouille, tentatives_connexion 
+        $sql = "SELECT id, pseudo, mail, mot_de_passe, grade, compte_verrouille, tentatives_connexion 
             FROM users 
             WHERE mail = :mail";
 

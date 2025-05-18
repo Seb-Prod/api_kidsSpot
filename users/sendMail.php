@@ -1,46 +1,49 @@
 <?php
 /**
  * @file
- * Endpoint pour l'envoi d'emails groupés aux utilisateurs.
+ * Endpoint pour l'envoi d'emails groupés aux utilisateurs (POST).
  * 
- * Cet endpoint permet d'envoyer un email à tous les utilisateurs
- * ayant activé l'option opt_in_email dans leur profil.
+ * Seuls les administrateurs (grade 4) peuvent accéder à cette ressource.
+ * Envoie un email personnalisé à tous les utilisateurs ayant activé l'option `opt_in_email`.
+ * Les emails incluent une personnalisation simple via la variable {PSEUDO}.
  */
 
+// --- Configuration des Headers HTTP ---
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Inclusion du middleware d'authentification
+// Inclusion des middlewares nécessaires
 include_once '../middleware/auth_middleware.php';
 include_once '../middleware/UserAutorisation.php';
-
-// Inclusion du middleware des réponses
 include_once '../middleware/ResponseHelper.php';
 
-// Vérification de l'authentification
+// Vérification de l'authentification et des autorisations (grade 4 requis)
 $donnees_utilisateur = verifierAuthentification();
 validateUserAutorisation($donnees_utilisateur, 4);
 
+// Vérifie que la méthode utilisée est POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    
+    // Inclusion des dépendances
     include_once '../config/Database.php';
     include_once '../models/Users.php';
     include_once '../middleware/Mailer.php';
     include_once '../middleware/Validator.php';
 
-    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
+    // Connexion à la base de données
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Users.
+    // Instanciation du modèle Users
     $user = new Users($db);
 
-    // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
+    // Récupération et décodage du corps JSON de la requête
     $donnees = (array) json_decode(file_get_contents("php://input"), true);
 
-    // Régles de validation des données
+    // Définition des règles de validation
     $rules = [
         'sujet' => Validator::withMessage(
             Validator::requiredStringMax(50),
@@ -48,48 +51,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ),
         'contenueHTML' => Validator::withMessage(
             Validator::requiredStringMax(500),
-            "Le contenue du mail est obligatoire et ne doit pas dépasser 500 caractères"
+            "Le contenu du mail est obligatoire et ne doit pas dépasser 500 caractères"
         )
-
     ];
-    
-    // Vérification des données
+
+    // Validation des données
     $errors = Validator::validate($donnees, $rules);
 
-    // Si des erreurs
     if (!empty($errors)) {
         sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
     }
 
+    // Préparation des variables
     $sujet = $donnees['sujet'];
     $contenuHTML = $donnees['contenueHTML'];
 
-    // Récupération de tous les utilisateurs qui ont opté pour recevoir des emails
+    // Récupération des utilisateurs ayant accepté de recevoir des emails
     $users = $user->getUsersWithEmailOptIn()->fetchAll(PDO::FETCH_ASSOC);
-
 
     $countSuccess = 0;
     $countFailed = 0;
+    $failedEmails = [];
 
-    // Envoi des emails à chaque utilisateur
+    // Boucle d'envoi des emails
     foreach ($users as $userData) {
-        // Personnalisation optionnelle du contenu pour chaque utilisateur
+        // Personnalisation du contenu
         $emailContent = str_replace('{PSEUDO}', $userData['pseudo'], $contenuHTML);
         
-        // Envoi de l'email
-        if (envoyerEmail($userData['mail'], $sujet, $contenuHTML)) {
+        if (envoyerEmail($userData['mail'], $sujet, $emailContent)) {
             $countSuccess++;
         } else {
             $countFailed++;
             $failedEmails[] = $userData['mail'];
         }
-        
-        // Pause courte pour éviter de surcharger le serveur SMTP
-        usleep(200000); // 200ms
+
+        // Pause pour ne pas saturer le serveur SMTP
+        usleep(200000); // 200 ms
     }
 
-    // Journal des emails envoyés
-    $logMessage = date('Y-m-d H:i:s') . " - Envoi groupé: $countSuccess réussis, $countFailed échoués. Sujet: " . substr($sujet, 0, 50);
+    // Log optionnel (désactivé)
+    //$logMessage = date('Y-m-d H:i:s') . " - Envoi groupé: $countSuccess réussis, $countFailed échoués. Sujet: " . substr($sujet, 0, 50);
     //error_log($logMessage, 3, "../logs/email.log");
 
     // Réponse
@@ -100,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         "success" => $countSuccess,
         "failed" => $countFailed
     ];
-    
+
     if ($countFailed > 0) {
         $response["failed_emails"] = $failedEmails;
     }
@@ -111,6 +112,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 } else {
     sendErrorResponse("La méthode n'est pas autorisée", 405);
 }
-
-
-?>

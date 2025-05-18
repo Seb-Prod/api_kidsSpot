@@ -1,103 +1,113 @@
 <?php
 
 /**
- * @file
- * API Endpoint pour la création d'un nouvel utilisateur.
- *
- * Gère les requêtes HTTP POST. Le corps de la requête doit contenir un JSON avec les informations
- * du nouvel utilisateur à créer. Retourne un statut HTTP et un message JSON indiquant le succès
- * ou l'échec de l'opération, ainsi que les erreurs de validation si nécessaire.
- *
- * @date 2025-04-12
+ * API Endpoint pour créer un utilisateur (POST).
  */
 ob_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
-// --- Configuration des Headers HTTP ---
-
+/**
+ * Configuration des Headers HTTP pour autoriser les requêtes CORS et définir le type de contenu.
+ */
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Inclusion du middleware des réponses
+/**
+ * Inclusion du fichier contenant les fonctions de gestion des réponses HTTP.
+ */
 include_once '../middleware/ResponseHelper.php';
 
-// Vérification de la Méthode HTTP
+/**
+ * Vérifie si la méthode de la requête est POST.
+ */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    /**
+     * Inclusion des fichiers nécessaires pour la connexion à la base de données,
+     * la manipulation des utilisateurs et la validation des données.
+     */
     include_once '../config/Database.php';
     include_once '../models/Users.php';
     include_once '../middleware/Validator.php';
 
-    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
+    /**
+     * Création d'une instance de la base de données et récupération de la connexion.
+     */
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Users.
+    /**
+     * Création d'une instance de la classe Users.
+     */
     $users = new Users($db);
 
-    // Les données envoyées au format JSON dans le corps de la requête sont décodées en un objet PHP.
+    /**
+     * Décodage des données JSON reçues dans le corps de la requête.
+     */
     $donnees = (array) json_decode(file_get_contents("php://input"), true);
 
-    // Régles de validation des données
+    /**
+     * Définition des règles de validation pour les données reçues.
+     */
     $rules = [
-        'pseudo' => Validator::withMessage(
-            Validator::requiredStringMax(50),
-            "Le pseudo est obligatoire et ne doit pas dépasser 150 caractères"
-        ),
-        'mail' => Validator::withMessage(
-            Validator::email(),
-            "Un email valide est obligatoire"
-        ),
-        'mot_de_passe' => Validator::withMessage(
-            Validator::password(),
-            "Le mot de passe doit être de 8 caractères, une majuscule, une minuscile et un chiffre"
-        ),
-        'telephone' => Validator::withMessage(
-            Validator::telephone(),
-            "Numero de téléphone doit être valide"
-        )
+        'pseudo' => Validator::withMessage(Validator::requiredStringMax(50), "Le pseudo est obligatoire et ne doit pas dépasser 150 caractères"),
+        'mail' => Validator::withMessage(Validator::email(), "Un email valide est obligatoire"),
+        'mot_de_passe' => Validator::withMessage(Validator::password(), "Le mot de passe doit être de 8 caractères, une majuscule, une minuscile et un chiffre"),
+        'telephone' => Validator::withMessage(Validator::telephone(), "Numero de téléphone doit être valide")
     ];
 
-    // Vérification des données
+    /**
+     * Validation des données selon les règles définies.
+     */
     $errors = Validator::validate($donnees, $rules);
 
-    // Si des erreurs
+    /**
+     * Si des erreurs de validation sont présentes, envoie une réponse d'erreur.
+     */
     if (!empty($errors)) {
         sendValidationErrorResponse("Les données fournies sont invalides.", $errors, 400);
     }
 
-    // Vérification si le pseudo existe déjà
+    /**
+     * Vérifie si le pseudo existe déjà dans la base de données.
+     */
     if (isset($donnees['pseudo']) && $users->pseudoExists($donnees['pseudo'])) {
         sendErrorResponse("Ce pseudo existe déjà.", 409);
     }
 
-    // Vérification si l'email existe déjà
+    /**
+     * Vérifie si l'email existe déjà dans la base de données.
+     */
     if (isset($donnees['mail']) && $users->emailExists($donnees['mail'])) {
         sendErrorResponse("Cet email existe déjà.", 409);
     }
 
-    // On assigne les valeurs des données reçues aux propriétés correspondantes de l'objet $users.
+    /**
+     * Assignation des valeurs des données reçues aux propriétés de l'objet utilisateur.
+     */
     foreach (array_keys($rules) as $champ) {
         if (isset($donnees[$champ])) {
             $users->$champ = $donnees[$champ];
         }
     }
 
-    // Tentative de création du lieux dans la base de données.
+    /**
+     * Tentative de création de l'utilisateur dans la base de données.
+     */
     if ($users->creer()) {
         sendCreatedResponse("L'ajout a été effectué.");
     } else {
         sendErrorResponse("L'ajout n'a pas été effectué.", 503);
     }
 } else {
-
+    /**
+     * Si la méthode de la requête n'est pas POST, envoie une réponse d'erreur.
+     */
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }
-
 
 ob_end_flush();

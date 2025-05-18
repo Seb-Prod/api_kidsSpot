@@ -76,6 +76,8 @@ class FormatHelper
                 "adresse" => self::safeJsonDecode($row['adresse'] ?? ''),
                 "code_postal" => self::safeJsonDecode($row['code_postal'] ?? ''),
                 "ville" => self::safeJsonDecode($row['ville'] ?? ''),
+                "telephone" => self::safeJsonDecode($row['telephone'] ?? ''),
+                "site_web" => self::safeJsonDecode($row['site_web'] ?? ''),
             ],
             "type" => self::decodeJsonArray($row['type_lieu'] ?? ''),
             "est_evenement" => (bool)($row['est_evenement'] ?? false),
@@ -88,8 +90,8 @@ class FormatHelper
                 "longitude" => round((float)($row['longitude'] ?? 0), 5),
                 "distance_km" => round((float)($row['distance'] ?? 0), 5)
             ],
-            "equipements" => self::parseCommaSeparated($row['equipements'] ?? ''),
-            "ages" => self::parseCommaSeparated($row['tranches_age'] ?? '')
+            "equipements" => self::decodeJsonArray($row['equipements'] ?? ''),
+            "ages" => self::decodeJsonArray($row['tranches_age'] ?? ''),
         ];
     }
 
@@ -254,6 +256,7 @@ class FormatHelper
                 "creation" => $row['date_creation'] ?? null,
                 "derniere_connexion" => $row['derniere_connexion'] ?? null,
             ],
+            "recevoirMail" => (bool)($row['opt_in_email'] ?? false),
             "preferences" => [
                 "tranches_age" => self::decodeJsonArray($row['tranches_age'] ?? ''),
                 "equipements" => self::decodeJsonArray($row['equipements'] ?? '')

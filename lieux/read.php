@@ -5,54 +5,56 @@
  * Endpoint API pour récupérer les détails d'un lieu spécifique via son ID.
  */
 
-// Configuration des Headers HTTP
+// Headers HTTP
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+// Inclusion des helpers
 include_once '../middleware/ResponseHelper.php';
 
-// Vérification de la Méthode HTTP
+// Vérifie que la méthode utilisée est GET
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    // --- Inclusion des Fichiers Nécessaires ---
+    // Connexion à la base de données
     include_once '../config/Database.php';
     include_once '../models/Lieux.php';
     include_once '../middleware/FormatHelper.php';
 
-    // Crée une nouvelle instance de la classe Database pour établir une connexion à la base de données.
     $database = new Database();
     $db = $database->getConnexion();
 
-    // Crée une nouvelle instance de la classe Lieux.
     $lieux = new Lieux($db);
 
-    // Vérifie si le paramètre 'id' est présent dans l'URL de la requête GET.
+    // Vérifie si l'ID est passé dans l'URL
     if (isset($_GET['id'])) {
-        // Filtre et valide la valeur du paramètre 'id' pour s'assurer que c'est un entier.
+        // Vérifie que l'ID est un entier positif
         $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
             sendErrorResponse("L'ID fourni n'est pas valide.", 400);
             exit;
         }
-        // Récupération du commentaire par ID
+
+        // Récupère le lieu par son ID
         $stmt = $lieux->getPlaceById($id);
 
-        // Vérifie si l'exécution de la requête a réussi et s'il y a au moins un résultat.
+        // Si un lieu est trouvé
         if ($stmt && $stmt->rowCount() > 0) {
-            // Récupère la première (et unique) ligne de résultat sous forme de tableau associatif.
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            // Initialisation du tableau associatif pour stocker les informations du lieu.
             $tableauLieu = FormatHelper::lieuDetail($row);
-            // Reponse
+
+            // Renvoie les détails du lieu
             sendSuccessResponse($tableauLieu, 200);
         } else {
+            // Aucun lieu trouvé
             sendErrorResponse("Aucun lieu trouvé pour cet ID.", 404);
         }
     } else {
+        // ID non fourni
         sendErrorResponse("L'ID du lieu est manquant.", 400);
     }
 } else {
+    // Méthode non autorisée
     sendErrorResponse("La méthode n'est pas autorisée.", 405);
 }

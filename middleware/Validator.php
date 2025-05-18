@@ -115,7 +115,7 @@ class Validator
     public static function requiredStringMax($maxLength = PHP_INT_MAX): callable
     {
         return function ($val) use ($maxLength) {
-            return !empty($val) && is_string($val) && strlen($val) <= $maxLength;
+            return !empty($val) && is_string($val) && mb_strlen($val, 'UTF-8') <= $maxLength;
         };
     }
 
@@ -347,6 +347,23 @@ class Validator
             return $date && $date->format($format) === $val;
         };
     }
-}
 
-?>
+    /**
+     * Vérifie si la valeur est un booléen ou une représentation valide d’un booléen.
+     *
+     * Accepte les booléens natifs (true/false), ainsi que les chaînes '0', '1', 'true', 'false',
+     * ou encore les entiers 0 et 1.
+     *
+     * @return callable Une fonction de validation qui retourne true si la valeur est un booléen
+     * ou une représentation booléenne acceptable, false sinon.
+     */
+    public static function boolean(): callable
+    {
+        return function ($val) {
+            return is_bool($val)
+                || $val === 0 || $val === 1
+                || $val === '0' || $val === '1'
+                || $val === 'true' || $val === 'false';
+        };
+    }
+}
